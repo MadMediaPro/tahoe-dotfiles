@@ -11,6 +11,7 @@ A clean, modern, and consistent macOS Tahoe rice for **KDE Plasma 6 (Wayland)** 
 | **OS** | CachyOS x86_64 (Arch Linux) |
 | **Desktop Environment** | KDE Plasma 6 (Wayland) |
 | **Application Style** | [Darkly](https://github.com/Bali1058/Darkly) (Translucent, Rounded, Blur) |
+| **GTK Theme** | [MacTahoe-gtk-theme](https://github.com/vinceliuice/MacTahoe-gtk-theme) (Dark variant) |
 | **Window Decoration** | [Klassy](https://github.com/paulmcauley/klassy) (macOS Left-aligned buttons) |
 | **Global Theme / Colors** | MacTahoeDark |
 | **Icon Theme** | MacTahoe *(Included: Custom Wi-Fi patch for 24px & 32px)* |

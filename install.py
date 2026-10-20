@@ -40,6 +40,9 @@ MAPPINGS = [
     ("dotfiles/.config/cava", ".config/cava"),
     ("dotfiles/.config/konsolerc", ".config/konsolerc"),
     ("dotfiles/.config/dolphinrc", ".config/dolphinrc"),
+    ("dotfiles/.config/gtk-3.0", ".config/gtk-3.0"),
+    ("dotfiles/.config/gtk-4.0", ".config/gtk-4.0"),
+    ("dotfiles/.config/xsettingsd", ".config/xsettingsd"),
 
     # .local/share files & directories
     ("dotfiles/.local/share/color-schemes", ".local/share/color-schemes"),
@@ -50,9 +53,10 @@ MAPPINGS = [
     ("dotfiles/.local/share/albert", ".local/share/albert"),
     ("dotfiles/.local/share/applications/albert-toggle.desktop", ".local/share/applications/albert-toggle.desktop"),
 
-    # Shell
+    # Shell & Home
     ("dotfiles/shell/.zshrc", ".zshrc"),
     ("dotfiles/shell/.p10k.zsh", ".p10k.zsh"),
+    ("dotfiles/shell/.gtkrc-2.0", ".gtkrc-2.0"),
 ]
 
 def log_info(msg):
@@ -249,6 +253,37 @@ def ensure_fonts(dry_run: bool):
     else:
         log_warn(f"'git' not found. Please manually install fonts to: {fonts_dir}")
 
+def ensure_gtk_theme(dry_run: bool):
+    theme_dir = HOME_DIR / ".themes/MacTahoe-Dark"
+    if theme_dir.exists():
+        log_success("MacTahoe GTK theme is already installed in ~/.themes.")
+        return
+
+    log_info("MacTahoe GTK theme not detected. Downloading from GitHub...")
+    if dry_run:
+        log_info("[Dry-Run] Would clone https://github.com/vinceliuice/MacTahoe-gtk-theme.git and run ./install.sh -d ~/.themes")
+        return
+
+    if not shutil.which("git"):
+        log_warn("git not found. Please install MacTahoe-gtk-theme manually from: https://github.com/vinceliuice/MacTahoe-gtk-theme")
+        return
+
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp_repo = Path(tmp_dir) / "MacTahoe-gtk-theme"
+        ret = subprocess.run([
+            "git", "clone", "--depth", "1",
+            "https://github.com/vinceliuice/MacTahoe-gtk-theme.git",
+            str(tmp_repo)
+        ])
+        if ret.returncode == 0:
+            install_script = tmp_repo / "install.sh"
+            if install_script.exists():
+                subprocess.run(["bash", str(install_script), "-d", str(HOME_DIR / ".themes")], cwd=tmp_repo)
+                log_success("MacTahoe GTK theme installed successfully to ~/.themes.")
+        else:
+            log_error("Failed to clone MacTahoe-gtk-theme. Please install manually.")
+
 def rebuild_caches(dry_run: bool):
     if dry_run:
         log_info("[Dry-Run] Would rebuild sycoca and icon caches.")
@@ -297,6 +332,9 @@ def main():
 
     # Install Apple SF Pro fonts if missing
     ensure_fonts(args.dry_run)
+
+    # Install MacTahoe GTK theme if missing
+    ensure_gtk_theme(args.dry_run)
 
     # Patch MacTahoe Wi-Fi icons
     apply_wifi_patch(args.dry_run)

@@ -5,6 +5,7 @@
 darkly
 klassy
 plasma6-applets-quickbar
+sassc
 
 # Launcher / Spotlight
 albert-bin

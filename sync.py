@@ -35,6 +35,9 @@ MAPPINGS = [
     (".config/cava", ".config/cava"),
     (".config/konsolerc", ".config/konsolerc"),
     (".config/dolphinrc", ".config/dolphinrc"),
+    (".config/gtk-3.0", ".config/gtk-3.0"),
+    (".config/gtk-4.0", ".config/gtk-4.0"),
+    (".config/xsettingsd", ".config/xsettingsd"),
 
     (".local/share/color-schemes/MacTahoeDark.colors", ".local/share/color-schemes/MacTahoeDark.colors"),
     (".local/share/color-schemes/MacTahoeLight.colors", ".local/share/color-schemes/MacTahoeLight.colors"),
@@ -50,6 +53,7 @@ MAPPINGS = [
 
     (".zshrc", "shell/.zshrc"),
     (".p10k.zsh", "shell/.p10k.zsh"),
+    (".gtkrc-2.0", "shell/.gtkrc-2.0"),
 ]
 
 def main():
