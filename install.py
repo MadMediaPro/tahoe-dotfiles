@@ -39,12 +39,14 @@ MAPPINGS = [
     ("dotfiles/.config/alacritty", ".config/alacritty"),
     ("dotfiles/.config/cava", ".config/cava"),
     ("dotfiles/.config/konsolerc", ".config/konsolerc"),
+    ("dotfiles/.config/dolphinrc", ".config/dolphinrc"),
 
     # .local/share files & directories
     ("dotfiles/.local/share/color-schemes", ".local/share/color-schemes"),
     ("dotfiles/.local/share/konsole", ".local/share/konsole"),
     ("dotfiles/.local/share/plasma/plasmoids", ".local/share/plasma/plasmoids"),
     ("dotfiles/.local/share/kwin/scripts", ".local/share/kwin/scripts"),
+    ("dotfiles/.local/share/kxmlgui5/dolphin", ".local/share/kxmlgui5/dolphin"),
     ("dotfiles/.local/share/albert", ".local/share/albert"),
     ("dotfiles/.local/share/applications/albert-toggle.desktop", ".local/share/applications/albert-toggle.desktop"),
 

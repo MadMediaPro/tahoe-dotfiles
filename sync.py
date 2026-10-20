@@ -34,6 +34,7 @@ MAPPINGS = [
     (".config/alacritty", ".config/alacritty"),
     (".config/cava", ".config/cava"),
     (".config/konsolerc", ".config/konsolerc"),
+    (".config/dolphinrc", ".config/dolphinrc"),
 
     (".local/share/color-schemes/MacTahoeDark.colors", ".local/share/color-schemes/MacTahoeDark.colors"),
     (".local/share/color-schemes/MacTahoeLight.colors", ".local/share/color-schemes/MacTahoeLight.colors"),
@@ -43,6 +44,7 @@ MAPPINGS = [
     (".local/share/plasma/plasmoids/org.kde.mac-tahoe-liquid-kde.trashcan", ".local/share/plasma/plasmoids/org.kde.mac-tahoe-liquid-kde.trashcan"),
     (".local/share/plasma/plasmoids/org.kde.mac-tahoe-liquid-kde.launcher", ".local/share/plasma/plasmoids/org.kde.mac-tahoe-liquid-kde.launcher"),
     (".local/share/kwin/scripts", ".local/share/kwin/scripts"),
+    (".local/share/kxmlgui5/dolphin", ".local/share/kxmlgui5/dolphin"),
     (".local/share/albert/widgetsboxmodel/themes", ".local/share/albert/widgetsboxmodel/themes"),
     (".local/share/applications/albert-toggle.desktop", ".local/share/applications/albert-toggle.desktop"),
 
