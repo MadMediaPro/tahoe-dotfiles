@@ -141,6 +141,47 @@ def apply_wifi_patch(dry_run: bool):
 
     log_success("Wi-Fi icon patch applied successfully to MacTahoe theme!")
 
+def ensure_fonts(dry_run: bool):
+    fonts_dir = HOME_DIR / ".local/share/fonts/apple-san-francisco-pro-fonts"
+    
+    has_font = False
+    if fonts_dir.exists() and any(fonts_dir.iterdir()):
+        has_font = True
+    elif shutil.which("fc-list"):
+        try:
+            res = subprocess.run(["fc-list", ":", "family"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+            if "SF Pro Display" in res.stdout:
+                has_font = True
+        except Exception:
+            pass
+
+    if has_font:
+        log_success("Apple SF Pro Display fonts are already installed.")
+        return
+
+    log_info("Apple SF Pro fonts not found. Downloading from GitHub...")
+    if dry_run:
+        log_info(f"[Dry-Run] Would clone https://github.com/sahibjotsw/apple-san-francisco-pro-fonts.git to {fonts_dir}")
+        return
+
+    fonts_dir.parent.mkdir(parents=True, exist_ok=True)
+    if shutil.which("git"):
+        ret = subprocess.run([
+            "git", "clone", "--depth", "1",
+            "https://github.com/sahibjotsw/apple-san-francisco-pro-fonts.git",
+            str(fonts_dir)
+        ])
+        if ret.returncode == 0:
+            log_success("Apple SF Pro fonts downloaded successfully.")
+            if shutil.which("fc-cache"):
+                log_info("Refreshing font cache (fc-cache)...")
+                subprocess.run(["fc-cache", "-f", str(fonts_dir.parent)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                log_success("Font cache updated.")
+        else:
+            log_error(f"Failed to clone fonts. You can manually download to: {fonts_dir}")
+    else:
+        log_warn(f"'git' not found. Please manually install fonts to: {fonts_dir}")
+
 def rebuild_caches(dry_run: bool):
     if dry_run:
         log_info("[Dry-Run] Would rebuild sycoca and icon caches.")
@@ -181,6 +222,9 @@ def main():
         src = REPO_DIR / clean_rel
         dest = HOME_DIR / home_rel
         install_item(src, dest, backup_dir, args.symlink, args.dry_run)
+
+    # Install Apple SF Pro fonts if missing
+    ensure_fonts(args.dry_run)
 
     # Patch MacTahoe Wi-Fi icons
     apply_wifi_patch(args.dry_run)

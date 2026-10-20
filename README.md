@@ -65,8 +65,8 @@ yay -S - < packages.txt
 ```
 
 ### Essential Themes & Fonts:
-1. **Fonts:** Install **SF Pro Display** fonts to `~/.local/share/fonts/`.
-2. **Icon Theme:** Install **MacTahoe** icon theme to `~/.local/share/icons/MacTahoe/`.
+1. **Fonts (Automatic):** `install.py` will automatically detect and download **Apple SF Pro Display** fonts to `~/.local/share/fonts/` if missing.
+2. **Icon Theme:** Install **MacTahoe** icon theme to `~/.local/share/icons/MacTahoe/` (the installer will automatically apply the Wi-Fi icon patches).
 
 ---
 
