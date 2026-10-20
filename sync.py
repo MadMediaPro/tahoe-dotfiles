@@ -35,6 +35,7 @@ MAPPINGS = [
     (".config/cava", ".config/cava"),
     (".config/konsolerc", ".config/konsolerc"),
     (".config/dolphinrc", ".config/dolphinrc"),
+    (".config/dolphin/dolphin.qss", ".config/dolphin/dolphin.qss"),
     (".config/gtk-3.0", ".config/gtk-3.0"),
     (".config/gtk-4.0", ".config/gtk-4.0"),
     (".config/xsettingsd", ".config/xsettingsd"),
@@ -50,6 +51,8 @@ MAPPINGS = [
     (".local/share/kxmlgui5/dolphin", ".local/share/kxmlgui5/dolphin"),
     (".local/share/albert/widgetsboxmodel/themes", ".local/share/albert/widgetsboxmodel/themes"),
     (".local/share/applications/albert-toggle.desktop", ".local/share/applications/albert-toggle.desktop"),
+    (".local/share/applications/org.kde.dolphin.desktop", ".local/share/applications/org.kde.dolphin.desktop"),
+    (".local/bin/dolphin", ".local/bin/dolphin"),
 
     (".zshrc", "shell/.zshrc"),
     (".p10k.zsh", "shell/.p10k.zsh"),
@@ -69,8 +72,12 @@ def main():
 
         dest.parent.mkdir(parents=True, exist_ok=True)
         if src.is_dir():
-            shutil.copytree(src, dest, symlinks=True, dirs_exist_ok=True)
+            if dest.exists():
+                shutil.rmtree(dest)
+            shutil.copytree(src, dest, symlinks=True)
         else:
+            if dest.exists() or dest.is_symlink():
+                dest.unlink()
             shutil.copy2(src, dest)
 
         print(f"{GREEN}[✓]{RESET} Synced {home_rel} -> {repo_rel}")

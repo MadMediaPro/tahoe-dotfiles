@@ -40,6 +40,7 @@ MAPPINGS = [
     ("dotfiles/.config/cava", ".config/cava"),
     ("dotfiles/.config/konsolerc", ".config/konsolerc"),
     ("dotfiles/.config/dolphinrc", ".config/dolphinrc"),
+    ("dotfiles/.config/dolphin/dolphin.qss", ".config/dolphin/dolphin.qss"),
     ("dotfiles/.config/gtk-3.0", ".config/gtk-3.0"),
     ("dotfiles/.config/gtk-4.0", ".config/gtk-4.0"),
     ("dotfiles/.config/xsettingsd", ".config/xsettingsd"),
@@ -52,6 +53,8 @@ MAPPINGS = [
     ("dotfiles/.local/share/kxmlgui5/dolphin", ".local/share/kxmlgui5/dolphin"),
     ("dotfiles/.local/share/albert", ".local/share/albert"),
     ("dotfiles/.local/share/applications/albert-toggle.desktop", ".local/share/applications/albert-toggle.desktop"),
+    ("dotfiles/.local/share/applications/org.kde.dolphin.desktop", ".local/share/applications/org.kde.dolphin.desktop"),
+    ("dotfiles/.local/bin/dolphin", ".local/bin/dolphin"),
 
     # Shell & Home
     ("dotfiles/shell/.zshrc", ".zshrc"),
