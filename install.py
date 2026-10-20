@@ -61,6 +61,65 @@ def log_warn(msg):
 def log_error(msg):
     print(f"{RED}[✗]{RESET} {msg}")
 
+def get_missing_packages():
+    pkg_file = REPO_DIR / "packages.txt"
+    if not pkg_file.exists():
+        return []
+
+    pkgs = []
+    with open(pkg_file, "r") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#"):
+                pkgs.append(line)
+
+    missing = []
+    for pkg in pkgs:
+        # Check if installed using pacman -Q
+        res = subprocess.run(["pacman", "-Q", pkg], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if res.returncode != 0:
+            # Also check if it's an executable in PATH (e.g. starship in /usr/local/bin)
+            if not shutil.which(pkg):
+                missing.append(pkg)
+
+    return missing
+
+def install_packages(dry_run: bool, auto_yes: bool = False):
+    missing = get_missing_packages()
+    if not missing:
+        log_success("All prerequisite packages are already installed.")
+        return
+
+    log_warn(f"Missing packages detected ({len(missing)}): {', '.join(missing)}")
+
+    pkg_mgr = None
+    for mgr in ["yay", "paru", "pacman"]:
+        if shutil.which(mgr):
+            pkg_mgr = mgr
+            break
+
+    if not pkg_mgr:
+        log_error("No package manager (yay/paru/pacman) found to install missing packages.")
+        return
+
+    if dry_run:
+        log_info(f"[Dry-Run] Would run: {pkg_mgr} -S --needed {' '.join(missing)}")
+        return
+
+    if not auto_yes:
+        try:
+            choice = input(f"{YELLOW}[?]{RESET} Install missing packages now using {pkg_mgr}? [Y/n]: ").strip().lower()
+            if choice not in ["", "y", "yes"]:
+                log_info("Skipping package installation.")
+                return
+        except (KeyboardInterrupt, EOFError):
+            print()
+            return
+
+    log_info(f"Installing missing packages using {pkg_mgr}...")
+    cmd = [pkg_mgr, "-S", "--needed"] + missing
+    subprocess.run(cmd)
+
 def install_item(src: Path, dest: Path, backup_dir: Path, use_symlink: bool, dry_run: bool):
     if not src.exists():
         return
@@ -206,10 +265,15 @@ def main():
     parser = argparse.ArgumentParser(description="Install and setup KDE Plasma 6 dotfiles.")
     parser.add_argument("--symlink", action="store_true", help="Create symlinks instead of copying files.")
     parser.add_argument("--no-backup", action="store_true", help="Skip backing up existing configuration files.")
+    parser.add_argument("--install-pkgs", action="store_true", help="Automatically install missing packages without prompting.")
+    parser.add_argument("-y", "--yes", action="store_true", help="Automatically answer yes to all confirmation prompts.")
     parser.add_argument("--dry-run", action="store_true", help="Show what actions would be performed without doing them.")
     args = parser.parse_args()
 
     print(f"\n{BOLD}{CYAN}=== KDE Plasma 6 Dotfiles Installer ==={RESET}\n")
+
+    # Step 1: Check and install missing packages
+    install_packages(args.dry_run, auto_yes=(args.install_pkgs or args.yes))
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     backup_dir = None
