@@ -6,6 +6,9 @@ darkly
 klassy
 plasma6-applets-quickbar
 
+# Launcher / Spotlight
+albert-bin
+
 # Terminals & Audio
 alacritty
 cava

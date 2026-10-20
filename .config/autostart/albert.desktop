@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Albert
+Comment=A sophisticated standalone keyboard launcher
+Exec=albert --platform xcb
+Icon=albert
+Terminal=false
+Type=Application
+Categories=Utility;
+StartupNotify=false
+X-GNOME-Autostart-enabled=true

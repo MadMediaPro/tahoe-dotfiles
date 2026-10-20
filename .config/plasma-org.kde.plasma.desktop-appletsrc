@@ -17,6 +17,7 @@ wallpaperplugin=org.kde.image
 [Containments][23][Applets][24]
 immutability=1
 plugin=org.kde.plasma.kickoff
+transient=true
 
 [Containments][23][Applets][24][Configuration]
 popupHeight=517
@@ -63,8 +64,12 @@ plugin=org.kde.plasma.marginsseparator
 immutability=1
 plugin=org.kde.mac-tahoe-liquid-kde.trashcan
 
+[Containments][23][Applets][77]
+immutability=1
+plugin=org.kde.mac-tahoe-liquid-kde.launcher
+
 [Containments][23][General]
-AppletOrder=24;26;27;76
+AppletOrder=77;26;27;76
 
 [Containments][4][Wallpaper][org.kde.image][General]
 Image=/usr/share/wallpapers/cachyos-wallpapers/north.png
@@ -249,6 +254,19 @@ shownItems=org.kde.plasma.battery
 [Containments][47][Applets][65]
 immutability=1
 plugin=org.quickbar.globalmenu
+
+[Containments][47][Applets][65][Configuration][Appearance]
+fontFamily=SF Pro Display
+fontSize=9
+fontWeight=700
+itemSpacing=10
+
+[Containments][47][Applets][65][Configuration][ConfigDialog]
+DialogHeight=630
+DialogWidth=810
+
+[Containments][47][Applets][65][Configuration][General]
+showApplicationName=true
 
 [Containments][47][Applets][66]
 immutability=1

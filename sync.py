@@ -28,6 +28,9 @@ MAPPINGS = [
     (".config/plasmashellrc", ".config/plasmashellrc"),
     (".config/plasma-org.kde.plasma.desktop-appletsrc", ".config/plasma-org.kde.plasma.desktop-appletsrc"),
     (".config/starship.toml", ".config/starship.toml"),
+    (".config/albert/config", ".config/albert/config"),
+    (".config/albert/websearch/engines.json", ".config/albert/websearch/engines.json"),
+    (".config/autostart/albert.desktop", ".config/autostart/albert.desktop"),
     (".config/alacritty", ".config/alacritty"),
     (".config/cava", ".config/cava"),
     (".config/konsolerc", ".config/konsolerc"),
@@ -39,6 +42,8 @@ MAPPINGS = [
     (".local/share/plasma/plasmoids/org.51n7.kMenu", ".local/share/plasma/plasmoids/org.51n7.kMenu"),
     (".local/share/plasma/plasmoids/org.kde.mac-tahoe-liquid-kde.trashcan", ".local/share/plasma/plasmoids/org.kde.mac-tahoe-liquid-kde.trashcan"),
     (".local/share/kwin/scripts", ".local/share/kwin/scripts"),
+    (".local/share/albert/widgetsboxmodel/themes", ".local/share/albert/widgetsboxmodel/themes"),
+    (".local/share/applications/albert-toggle.desktop", ".local/share/applications/albert-toggle.desktop"),
 
     (".zshrc", "shell/.zshrc"),
     (".p10k.zsh", "shell/.p10k.zsh"),

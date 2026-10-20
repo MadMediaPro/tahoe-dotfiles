@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Albert Toggle
+Comment=Toggle Albert Launcher
+Exec=albert toggle
+Icon=albert
+Type=Application
+Terminal=false
+Categories=Utility;
+StartupNotify=false
+X-KDE-GlobalAccel-CommandShortcut=true

@@ -126,7 +126,6 @@ PlasmoidItem {
     ]
 
     // representation
-    compactRepresentation: fullRepresentation
     preferredRepresentation: fullRepresentation
     fullRepresentation: MouseArea {
         id: mouseArea
@@ -182,6 +181,10 @@ PlasmoidItem {
         }
 
         Kirigami.Icon {
+            // Paint at the applet's actual size: the panel gives the applet
+            // 38px, and rounding to the nearest theme size (32px) leaves a
+            // visibly smaller icon than the dock's app icons.
+            roundToIconSize: false
             source: Plasmoid.icon
             anchors {
                 left: parent.left

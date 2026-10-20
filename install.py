@@ -34,6 +34,8 @@ MAPPINGS = [
     ("dotfiles/.config/plasmashellrc", ".config/plasmashellrc"),
     ("dotfiles/.config/plasma-org.kde.plasma.desktop-appletsrc", ".config/plasma-org.kde.plasma.desktop-appletsrc"),
     ("dotfiles/.config/starship.toml", ".config/starship.toml"),
+    ("dotfiles/.config/albert", ".config/albert"),
+    ("dotfiles/.config/autostart/albert.desktop", ".config/autostart/albert.desktop"),
     ("dotfiles/.config/alacritty", ".config/alacritty"),
     ("dotfiles/.config/cava", ".config/cava"),
     ("dotfiles/.config/konsolerc", ".config/konsolerc"),
@@ -43,6 +45,8 @@ MAPPINGS = [
     ("dotfiles/.local/share/konsole", ".local/share/konsole"),
     ("dotfiles/.local/share/plasma/plasmoids", ".local/share/plasma/plasmoids"),
     ("dotfiles/.local/share/kwin/scripts", ".local/share/kwin/scripts"),
+    ("dotfiles/.local/share/albert", ".local/share/albert"),
+    ("dotfiles/.local/share/applications/albert-toggle.desktop", ".local/share/applications/albert-toggle.desktop"),
 
     # Shell
     ("dotfiles/shell/.zshrc", ".zshrc"),

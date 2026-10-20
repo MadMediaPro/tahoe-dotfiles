@@ -17,6 +17,7 @@ A clean, modern, and consistent macOS Tahoe rice for **KDE Plasma 6 (Wayland)** 
 | **Cursor Theme** | MacTahoe-dark |
 | **System Font** | SF Pro Display (10pt) |
 | **Monospace Font** | SF Mono (10pt) |
+| **Launcher / Spotlight** | [Albert](https://albertlauncher.github.io/) (Meta+Space, MacTahoe Glass theme) |
 | **Top Panel** | Apple Menu (`kMenu`), Global Menu (`Quickbar`), Active Window Title, System Tray, Digital Clock |
 | **Dock** | Floating Plasma Panel (`icontasks`), Trash Can widget (`mac-tahoe-liquid-kde.trashcan`) |
 | **Shell & Prompt** | Zsh + [Starship](https://starship.rs/) (Gruvbox Dark preset) |
