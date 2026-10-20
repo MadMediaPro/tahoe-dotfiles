@@ -41,6 +41,7 @@ MAPPINGS = [
     (".local/share/plasma/plasmoids/com.github.antroids.application-title-bar", ".local/share/plasma/plasmoids/com.github.antroids.application-title-bar"),
     (".local/share/plasma/plasmoids/org.51n7.kMenu", ".local/share/plasma/plasmoids/org.51n7.kMenu"),
     (".local/share/plasma/plasmoids/org.kde.mac-tahoe-liquid-kde.trashcan", ".local/share/plasma/plasmoids/org.kde.mac-tahoe-liquid-kde.trashcan"),
+    (".local/share/plasma/plasmoids/org.kde.mac-tahoe-liquid-kde.launcher", ".local/share/plasma/plasmoids/org.kde.mac-tahoe-liquid-kde.launcher"),
     (".local/share/kwin/scripts", ".local/share/kwin/scripts"),
     (".local/share/albert/widgetsboxmodel/themes", ".local/share/albert/widgetsboxmodel/themes"),
     (".local/share/applications/albert-toggle.desktop", ".local/share/applications/albert-toggle.desktop"),
