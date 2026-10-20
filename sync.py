@@ -49,6 +49,7 @@ MAPPINGS = [
     (".local/share/plasma/plasmoids/org.kde.mac-tahoe-liquid-kde.launcher", ".local/share/plasma/plasmoids/org.kde.mac-tahoe-liquid-kde.launcher"),
     (".local/share/kwin/scripts", ".local/share/kwin/scripts"),
     (".local/share/kxmlgui5/dolphin", ".local/share/kxmlgui5/dolphin"),
+    (".local/share/kxmlgui6/dolphin", ".local/share/kxmlgui6/dolphin"),
     (".local/share/albert/widgetsboxmodel/themes", ".local/share/albert/widgetsboxmodel/themes"),
     (".local/share/applications/albert-toggle.desktop", ".local/share/applications/albert-toggle.desktop"),
     (".local/share/applications/org.kde.dolphin.desktop", ".local/share/applications/org.kde.dolphin.desktop"),

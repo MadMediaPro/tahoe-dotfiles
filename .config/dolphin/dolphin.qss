@@ -1,40 +1,127 @@
 /* macOS Finder Style Toolbar for Dolphin */
 
 QToolBar {
-    spacing: 6px;
+    spacing: 0px;
     padding: 6px 10px;
     border: none;
     background: transparent;
 }
 
-/* Toolbar Buttons (Back, Forward, View Modes, Preview, etc.) */
+/* Group spacing via separators */
+QToolBar::separator {
+    width: 12px;
+    background: transparent;
+    border: none;
+}
+
+/* Base style for all toolbar buttons (standalone pills: Preview, Search, Hamburger menu) */
 QToolBar QToolButton {
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 7px;
-    padding: 4px 7px;
-    background-color: rgba(255, 255, 255, 0.05);
-    margin: 1px;
+    padding: 4px 8px;
+    background-color: rgba(255, 255, 255, 0.07);
+    margin: 0px;
 }
 
 QToolBar QToolButton:hover {
-    border: 1px solid rgba(255, 255, 255, 0.38);
     background-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.28);
 }
 
 QToolBar QToolButton:pressed {
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    background-color: rgba(255, 255, 255, 0.22);
+    background-color: rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.35);
 }
 
 QToolBar QToolButton:checked {
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    background-color: rgba(255, 255, 255, 0.18);
+    background-color: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.35);
 }
 
-/* URL Navigator & Search Bar */
+QToolBar QToolButton:disabled {
+    background-color: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* =========================================================
+   GROUP 1: Segmented Navigation Capsule [ < | > ]
+   ========================================================= */
+
+/* Left segment: Back */
+QToolBar QToolButton[toolTip*="Back"],
+QToolBar QToolButton[text*="Back"],
+QToolBar QToolButton[toolTip*="Kembali"],
+QToolBar QToolButton[text*="Kembali"],
+QToolBar QToolButton#go_back {
+    border-top-left-radius: 7px;
+    border-bottom-left-radius: 7px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-right: none;
+}
+
+/* Right segment: Forward */
+QToolBar QToolButton[toolTip*="Forward"],
+QToolBar QToolButton[text*="Forward"],
+QToolBar QToolButton[toolTip*="Maju"],
+QToolBar QToolButton[text*="Maju"],
+QToolBar QToolButton#go_forward {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    border-top-right-radius: 7px;
+    border-bottom-right-radius: 7px;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* =========================================================
+   GROUP 2: Segmented View Modes Capsule [ Icons | Compact | Details ]
+   ========================================================= */
+
+/* First segment: Icons */
+QToolBar QToolButton[toolTip*="Icons"],
+QToolBar QToolButton[text*="Icons"],
+QToolBar QToolButton[toolTip*="Ikon"],
+QToolBar QToolButton[text*="Ikon"],
+QToolBar QToolButton#icons {
+    border-top-left-radius: 7px;
+    border-bottom-left-radius: 7px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-right: none;
+}
+
+/* Middle segment: Compact */
+QToolBar QToolButton[toolTip*="Compact"],
+QToolBar QToolButton[text*="Compact"],
+QToolBar QToolButton[toolTip*="Kompak"],
+QToolBar QToolButton[text*="Kompak"],
+QToolBar QToolButton#compact {
+    border-radius: 0px;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+    border-right: none;
+}
+
+/* Last segment: Details */
+QToolBar QToolButton[toolTip*="Details"],
+QToolBar QToolButton[text*="Details"],
+QToolBar QToolButton[toolTip*="Detail"],
+QToolBar QToolButton[text*="Detail"],
+QToolBar QToolButton[toolTip*="Rincian"],
+QToolBar QToolButton[text*="Rincian"],
+QToolBar QToolButton#details {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    border-top-right-radius: 7px;
+    border-bottom-right-radius: 7px;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* =========================================================
+   Location Bar (Breadcrumbs / KUrlNavigator)
+   ========================================================= */
 QToolBar KUrlNavigator,
 QToolBar QLineEdit {
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 7px;
     padding: 3px 8px;
     background-color: rgba(0, 0, 0, 0.25);
@@ -43,8 +130,26 @@ QToolBar QLineEdit {
 QToolBar KUrlNavigator:hover,
 QToolBar QLineEdit:hover,
 QToolBar QLineEdit:focus {
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.35);
     background-color: rgba(0, 0, 0, 0.35);
+}
+
+/* Breadcrumbs buttons inside KUrlNavigator must NOT have outer toolbar borders */
+KUrlNavigator QToolButton {
+    border: none;
+    border-radius: 4px;
+    padding: 2px 4px;
+    background-color: transparent;
+}
+
+KUrlNavigator QToolButton:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border: none;
+}
+
+KUrlNavigator QToolButton:pressed {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: none;
 }
 
 /* Hide arrow dropdown indicator on toolbar buttons if any */

@@ -1,7 +1,27 @@
+[CompactMode]
+IconSize=22
+PreviewSize=22
+
+[ContentDisplay]
+DirectorySizeMode=ContentSize
+
+[ContextMenu]
+ShowCopyMoveMenu=true
+
+[DetailsMode]
+ExpandableFolders=true
+IconSize=22
+PreviewSize=22
+
 [General]
+AutoExpandFolders=true
+BrowseThroughArchives=true
+FilterBar=true
 RememberOpenedTabs=false
-ShowFullPath=false
-ShowStatusBar=true
+RenameInline=false
+ShowFullPath=true
+ShowSelectionToggle=false
+ShowStatusBar=Disabled
 Version=202
 ViewPropsTimestamp=2026,1,4,15,44,56.183
 
@@ -9,14 +29,8 @@ ViewPropsTimestamp=2026,1,4,15,44,56.183
 IconSize=80
 PreviewSize=80
 
-[DetailsMode]
-ExpandableFolders=true
-IconSize=22
-PreviewSize=22
-
-[CompactMode]
-IconSize=22
-PreviewSize=22
+[InformationPanel]
+showHovered=false
 
 [KFileDialog Settings]
 Places Icons Auto-resize=false
@@ -33,3 +47,6 @@ Plugins=audiothumbnail,blenderthumbnail,comicbookthumbnail,cursorthumbnail,djvut
 
 [Toolbar mainToolBar]
 ToolButtonStyle=IconOnly
+
+[UiSettings]
+ColorScheme=MacTahoeDark

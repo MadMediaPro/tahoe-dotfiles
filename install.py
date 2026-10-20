@@ -51,6 +51,7 @@ MAPPINGS = [
     ("dotfiles/.local/share/plasma/plasmoids", ".local/share/plasma/plasmoids"),
     ("dotfiles/.local/share/kwin/scripts", ".local/share/kwin/scripts"),
     ("dotfiles/.local/share/kxmlgui5/dolphin", ".local/share/kxmlgui5/dolphin"),
+    ("dotfiles/.local/share/kxmlgui6/dolphin", ".local/share/kxmlgui6/dolphin"),
     ("dotfiles/.local/share/albert", ".local/share/albert"),
     ("dotfiles/.local/share/applications/albert-toggle.desktop", ".local/share/applications/albert-toggle.desktop"),
     ("dotfiles/.local/share/applications/org.kde.dolphin.desktop", ".local/share/applications/org.kde.dolphin.desktop"),

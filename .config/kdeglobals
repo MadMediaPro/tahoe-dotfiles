@@ -149,6 +149,7 @@ Theme=MacTahoe
 AnimationDurationFactor=0.75
 AutomaticLookAndFeel=false
 LookAndFeelPackage=com.github.vinceliuice.MacTahoe-Dark
+ShowDeleteCommand=false
 contrast=4
 frameContrast=0.2
 widgetStyle=Darkly
@@ -169,6 +170,10 @@ Sort hidden files last=false
 Sort reversed=false
 Speedbar Width=140
 View Style=DetailTree
+
+[PreviewSettings]
+EnableRemoteFolderThumbnail=false
+MaximumRemoteSize=0
 
 [Sounds]
 Theme=ocean
