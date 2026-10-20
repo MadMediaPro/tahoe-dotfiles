@@ -1,0 +1,5 @@
+[General]
+Order=steam
+
+[steam]
+Enabled=false

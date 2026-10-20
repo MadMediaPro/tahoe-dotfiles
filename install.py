@@ -29,6 +29,7 @@ MAPPINGS = [
     ("dotfiles/.config/darklyrc", ".config/darklyrc"),
     ("dotfiles/.config/kdeglobals", ".config/kdeglobals"),
     ("dotfiles/.config/kwinrc", ".config/kwinrc"),
+    ("dotfiles/.config/kwinrulesrc", ".config/kwinrulesrc"),
     ("dotfiles/.config/klassy", ".config/klassy"),
     ("dotfiles/.config/plasmashellrc", ".config/plasmashellrc"),
     ("dotfiles/.config/plasma-org.kde.plasma.desktop-appletsrc", ".config/plasma-org.kde.plasma.desktop-appletsrc"),
@@ -41,6 +42,7 @@ MAPPINGS = [
     ("dotfiles/.local/share/color-schemes", ".local/share/color-schemes"),
     ("dotfiles/.local/share/konsole", ".local/share/konsole"),
     ("dotfiles/.local/share/plasma/plasmoids", ".local/share/plasma/plasmoids"),
+    ("dotfiles/.local/share/kwin/scripts", ".local/share/kwin/scripts"),
 
     # Shell
     ("dotfiles/shell/.zshrc", ".zshrc"),

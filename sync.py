@@ -23,6 +23,7 @@ MAPPINGS = [
     (".config/darklyrc", ".config/darklyrc"),
     (".config/kdeglobals", ".config/kdeglobals"),
     (".config/kwinrc", ".config/kwinrc"),
+    (".config/kwinrulesrc", ".config/kwinrulesrc"),
     (".config/klassy", ".config/klassy"),
     (".config/plasmashellrc", ".config/plasmashellrc"),
     (".config/plasma-org.kde.plasma.desktop-appletsrc", ".config/plasma-org.kde.plasma.desktop-appletsrc"),
@@ -37,6 +38,7 @@ MAPPINGS = [
     (".local/share/plasma/plasmoids/com.github.antroids.application-title-bar", ".local/share/plasma/plasmoids/com.github.antroids.application-title-bar"),
     (".local/share/plasma/plasmoids/org.51n7.kMenu", ".local/share/plasma/plasmoids/org.51n7.kMenu"),
     (".local/share/plasma/plasmoids/org.kde.mac-tahoe-liquid-kde.trashcan", ".local/share/plasma/plasmoids/org.kde.mac-tahoe-liquid-kde.trashcan"),
+    (".local/share/kwin/scripts", ".local/share/kwin/scripts"),
 
     (".zshrc", "shell/.zshrc"),
     (".p10k.zsh", "shell/.p10k.zsh"),
