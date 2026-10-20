@@ -27,7 +27,7 @@ fill=false
 highlightWindows=true
 iconSpacing=0
 indicateAudioStreams=false
-launchers=applications:systemsettings.desktop,preferred://filemanager,preferred://browser,applications:org.kde.konsole.desktop,applications:code.desktop,applications:spotify.desktop,applications:termius-app.desktop,applications:brave-browser.desktop,applications:brave-origin.desktop,applications:antigravity-ide.desktop,applications:jetbrains-datagrip.desktop
+launchers=applications:systemsettings.desktop,applications:org.gnome.Nautilus.desktop,preferred://browser,applications:org.kde.konsole.desktop,applications:code.desktop,applications:spotify.desktop,applications:termius-app.desktop,applications:brave-browser.desktop,applications:brave-origin.desktop,applications:antigravity-ide.desktop,applications:jetbrains-datagrip.desktop
 showOnlyCurrentDesktop=false
 showOnlyCurrentScreen=true
 unhideOnAttention=false
@@ -43,6 +43,13 @@ plugin=org.kde.mac-tahoe-liquid-kde.trashcan
 [Containments][23][Applets][77]
 immutability=1
 plugin=org.kde.mac-tahoe-liquid-kde.launcher
+
+[Containments][23][Applets][77][Configuration][ConfigDialog]
+DialogHeight=630
+DialogWidth=810
+
+[Containments][23][Applets][77][Shortcuts]
+global=Meta
 
 [Containments][23][General]
 AppletOrder=77;26;27;76
