@@ -1,0 +1,22 @@
+{
+  "KPackageStructure": "Plasma/Applet",
+  "KPlugin": {
+    "Authors": [
+      {
+        "Name": "51n7"
+      }
+    ],
+    "Category": "Application Launchers",
+    "Description": "A plasmoid (desktop widget) that provides a system menu with essential options, not unlike the apple menu found in MacOS.",
+    "Icon": "start-here-kde",
+    "Id": "org.51n7.kMenu",
+    "License": "GPL-2.0+",
+    "Name": "kMenu",
+    "ServiceTypes": [
+      "Plasma/Applet"
+    ],
+    "Version": "1.0",
+    "Website": "https://github.com/51n7/kMenu"
+  },
+  "X-Plasma-API-Minimum-Version": "6.0"
+}

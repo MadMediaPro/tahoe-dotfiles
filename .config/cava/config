@@ -1,0 +1,12 @@
+[input]
+method = pipewire
+source = auto
+
+[output]
+method = noncurses
+bars = 20
+bar_width = 1
+bar_spacing = 0
+max_height = 50
+orientation = bottom
+channels = stereo
