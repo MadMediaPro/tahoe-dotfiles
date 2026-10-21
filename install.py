@@ -216,6 +216,28 @@ def apply_wifi_patch(dry_run: bool):
 
     log_success("Wi-Fi icon patch applied successfully to MacTahoe theme!")
 
+def apply_finder_patch(dry_run: bool):
+    icon_source = REPO_DIR / "icons/file-manager-clear.svg"
+    if not icon_source.exists():
+        log_warn(f"Clear Finder icon not found at {icon_source}")
+        return
+
+    icons_dir = HOME_DIR / ".local/share/icons"
+    if not icons_dir.exists():
+        return
+
+    targets = [p for p in icons_dir.glob("MacTahoe*/apps/scalable/file-manager.svg") if p.is_file() and not p.is_symlink()]
+    if not targets:
+        return
+
+    log_info("Applying Clear Finder icon patch to MacTahoe themes...")
+    for target in targets:
+        if not dry_run:
+            shutil.copy2(icon_source, target)
+        log_info(f"Patched: {target.relative_to(HOME_DIR)}")
+
+    log_success("Clear Finder icon patch applied successfully!")
+
 def ensure_fonts(dry_run: bool):
     fonts_dir = HOME_DIR / ".local/share/fonts/apple-san-francisco-pro-fonts"
     
@@ -299,10 +321,12 @@ def rebuild_caches(dry_run: bool):
             subprocess.run([cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             break
 
-    icon_dir = HOME_DIR / ".local/share/icons/MacTahoe"
-    if icon_dir.exists() and shutil.which("gtk-update-icon-cache"):
-        log_info("Rebuilding GTK icon cache for MacTahoe...")
-        subprocess.run(["gtk-update-icon-cache", "-f", "-t", str(icon_dir)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    icons_base = HOME_DIR / ".local/share/icons"
+    if icons_base.exists() and shutil.which("gtk-update-icon-cache"):
+        log_info("Rebuilding GTK icon cache for MacTahoe themes...")
+        for d in icons_base.glob("MacTahoe*"):
+            if d.is_dir() and (d / "index.theme").exists():
+                subprocess.run(["gtk-update-icon-cache", "-f", "-t", str(d)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     log_success("Caches refreshed.")
 
@@ -342,6 +366,9 @@ def main():
 
     # Patch MacTahoe Wi-Fi icons
     apply_wifi_patch(args.dry_run)
+
+    # Patch MacTahoe Clear Finder icon
+    apply_finder_patch(args.dry_run)
 
     # Refresh KDE caches
     rebuild_caches(args.dry_run)
