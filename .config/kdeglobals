@@ -143,7 +143,7 @@ taskbarFont=SF Pro Display,10,-1,5,50,0,0,0,0,0
 toolBarFont=SF Pro Display,10,-1,5,50,0,0,0,0,0
 
 [Icons]
-Theme=MacTahoe
+Theme=MacTahoe-Frosted
 
 [KDE]
 AnimationDurationFactor=0.75

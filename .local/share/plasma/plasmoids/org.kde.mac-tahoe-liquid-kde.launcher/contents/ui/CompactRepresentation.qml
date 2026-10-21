@@ -15,8 +15,10 @@ Item {
     Kirigami.Icon {
         id: buttonIcon
 
-        width: Plasmoid.configuration.activationIndicator ? parent.width * 0.65 : parent.width
-        height: Plasmoid.configuration.activationIndicator ? parent.height * 0.65 : parent.height
+        roundToIconSize: false
+        readonly property real indicatorScale: Plasmoid.configuration.activationIndicator ? 0.65 : 1
+        width: Math.min(parent.width, Kirigami.Units.iconSizes.large) * 8 / 7 * indicatorScale
+        height: Math.min(parent.height, Kirigami.Units.iconSizes.large) * 8 / 7 * indicatorScale
         anchors.centerIn: parent
 
         source: useCustomButtonImage ? Plasmoid.configuration.customButtonImage : Plasmoid.configuration.icon

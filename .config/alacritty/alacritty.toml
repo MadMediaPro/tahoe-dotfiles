@@ -1,6 +1,11 @@
 [general]
+# Added by Gogh
+import = ["~/.config/alacritty/gogh.toml"]
 working_directory = "None"
 live_config_reload = true
+
+[terminal]
+shell = { program = "/usr/bin/tmux", args = ["new-session", "-A", "-s", "main"] }
 
 [env]
 TERM = "xterm-256color"
@@ -20,45 +25,47 @@ history = 10000
 multiplier = 3
 
 [font]
-normal = { family = "monospace", style = "Regular" }
-bold = { family = "monospace", style = "Bold" }
-italic = { family = "monospace", style = "Italic" }
-bold_italic = { family = "monospace", style = "Bold Italic" }
+normal = { family = "SF Mono", style = "Regular" }
+bold = { family = "SF Mono", style = "Bold" }
+italic = { family = "SF Mono", style = "Regular Italic" }
+bold_italic = { family = "SF Mono", style = "Bold Italic" }
 size = 12.0
 
 [colors]
 draw_bold_text_with_bright_colors = true
 
-[colors.primary]
-background = "0x2E3440"
-foreground = "0xD8DEE9"
+# Disabled by Gogh: [colors.primary]
+# Disabled by Gogh: background = "0x2E3440"
+# Disabled by Gogh: foreground = "0xD8DEE9"
 
-[colors.normal]
-black = "0x3B4252"
-red = "0xBF616A"
-green = "0xA3BE8C"
-yellow = "0xEBCB8B"
-blue = "0x81A1C1"
-magenta = "0xB48EAD"
-cyan = "0x88C0D0"
-white = "0xE5E9F0"
+# Disabled by Gogh: [colors.normal]
+# Disabled by Gogh: black = "0x3B4252"
+# Disabled by Gogh: red = "0xBF616A"
+# Disabled by Gogh: green = "0xA3BE8C"
+# Disabled by Gogh: yellow = "0xEBCB8B"
+# Disabled by Gogh: blue = "0x81A1C1"
+# Disabled by Gogh: magenta = "0xB48EAD"
+# Disabled by Gogh: cyan = "0x88C0D0"
+# Disabled by Gogh: white = "0xE5E9F0"
 
-[colors.bright]
-black = "0x4C566A"
-red = "0xBF616A"
-green = "0xA3BE8C"
-yellow = "0xEBCB8B"
-blue = "0x81A1C1"
-magenta = "0xB48EAD"
-cyan = "0x8FBCBB"
-white = "0xECEFF4"
+# Disabled by Gogh: [colors.bright]
+# Disabled by Gogh: black = "0x4C566A"
+# Disabled by Gogh: red = "0xBF616A"
+# Disabled by Gogh: green = "0xA3BE8C"
+# Disabled by Gogh: yellow = "0xEBCB8B"
+# Disabled by Gogh: blue = "0x81A1C1"
+# Disabled by Gogh: magenta = "0xB48EAD"
+# Disabled by Gogh: cyan = "0x8FBCBB"
+# Disabled by Gogh: white = "0xECEFF4"
 
 [selection]
 semantic_escape_chars = ",│`|:\"' ()[]{}<>\t"
 save_to_clipboard = true
 
 [cursor]
-style = { shape = "Underline", blinking = "Off" }
+style = { shape = "Beam", blinking = "Always" }
+blink_interval = 500
+blink_timeout = 0
 unfocused_hollow = true
 thickness = 0.15
 
@@ -70,7 +77,8 @@ bindings = [
 
 [keyboard]
 bindings = [
-{ key = "Paste", mods = "None", action = "Paste" },
+  { key = "T", mods = "Control|Shift", chars = "\u0002c" },
+  { key = "Paste", mods = "None", action = "Paste" },
 { key = "Copy", mods = "None", action = "Copy" },
 { key = "L", mods = "Control", action = "ClearLogNotice" },
 { key = "L", mods = "Control", mode = "~Vi", chars = "\f" },
