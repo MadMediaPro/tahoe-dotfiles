@@ -14,7 +14,7 @@ A clean, modern, and consistent macOS Tahoe rice for **KDE Plasma 6 (Wayland)** 
 | **GTK Theme** | [MacTahoe-gtk-theme](https://github.com/vinceliuice/MacTahoe-gtk-theme) (Dark variant) |
 | **Window Decoration** | [Klassy](https://github.com/paulmcauley/klassy) (macOS Left-aligned buttons) |
 | **Global Theme / Colors** | MacTahoeDark |
-| **Icon Theme** | MacTahoe *(Included: Custom Wi-Fi patch for 24px & 32px)* |
+| **Icon Theme** | MacTahoe + **MacTahoe-Frosted** *(Clear style: white glyphs on frosted glass)* |
 | **Cursor Theme** | MacTahoe-dark |
 | **System Font** | SF Pro Display (10pt) |
 | **Monospace Font** | SF Mono (10pt) |
@@ -50,7 +50,9 @@ dotfiles/
 ├── shell/
 │   ├── .zshrc                                    # Zsh configuration
 │   └── .p10k.zsh                                 # Powerlevel10k config (optional)
+├── icons/                                        # Custom Clear Finder icon patch
 ├── packages.txt                                  # List of essential packages
+├── frostify.py                                   # MacTahoe frosted-glass icon generator
 ├── install.py                                    # Python installer & restore script
 ├── sync.py                                       # Python script to sync active system configs to repo
 └── README.md
@@ -68,7 +70,7 @@ yay -S - < packages.txt
 
 ### Essential Themes & Fonts:
 1. **Fonts (Automatic):** `install.py` will automatically detect and download **Apple SF Pro Display** fonts to `~/.local/share/fonts/` if missing.
-2. **Icon Theme:** Install **MacTahoe** icon theme to `~/.local/share/icons/MacTahoe/` (the installer will automatically apply the Wi-Fi icon patches).
+2. **Icon Theme:** Install **MacTahoe** icon theme to `~/.local/share/icons/MacTahoe/`. The installer applies the Wi-Fi/Finder patches and generates **MacTahoe-Frosted** (Clear style: white monochrome glyphs on a translucent frosted tile) via `frostify.py`.
 
 ---
 
@@ -97,6 +99,16 @@ python3 install.py
 - **Dry-run mode (Preview changes without touching anything):**
   ```bash
   python3 install.py --dry-run
+  ```
+
+- **Skip the frosted icon theme generation:**
+  ```bash
+  python3 install.py --frosted none
+  ```
+
+- **Regenerate frosted icons only:**
+  ```bash
+  python3 frostify.py --mode clear
   ```
 
 ---

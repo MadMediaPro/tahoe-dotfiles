@@ -238,6 +238,41 @@ def apply_finder_patch(dry_run: bool):
 
     log_success("Clear Finder icon patch applied successfully!")
 
+def install_frosted_themes(dry_run: bool, modes):
+    if not modes:
+        return
+
+    src = HOME_DIR / ".local/share/icons/MacTahoe"
+    icons_dir = HOME_DIR / ".local/share/icons"
+    script = REPO_DIR / "frostify.py"
+
+    if not src.exists():
+        log_warn("MacTahoe icon theme not found at ~/.local/share/icons/MacTahoe.")
+        log_warn("Please install MacTahoe first, then re-run to generate frosted variants.")
+        return
+
+    if not script.exists():
+        log_warn(f"Frosted icon generator not found at {script}")
+        return
+
+    names = {"clear": "MacTahoe-Frosted"}
+    for mode in modes:
+        name = names[mode]
+        dest = icons_dir / name
+        log_info(f"Generating frosted icon theme: {name} ({mode})...")
+
+        if dry_run:
+            log_info(f"[Dry-Run] Would generate {dest} from {src}")
+            continue
+
+        result = subprocess.run(
+            [sys.executable, str(script), "--src", str(src), "--dest", str(dest), "--mode", mode]
+        )
+        if result.returncode == 0:
+            log_success(f"Generated: {dest.relative_to(HOME_DIR)}")
+        else:
+            log_error(f"Failed to generate {name}")
+
 def ensure_fonts(dry_run: bool):
     fonts_dir = HOME_DIR / ".local/share/fonts/apple-san-francisco-pro-fonts"
     
@@ -337,6 +372,8 @@ def main():
     parser.add_argument("--install-pkgs", action="store_true", help="Automatically install missing packages without prompting.")
     parser.add_argument("-y", "--yes", action="store_true", help="Automatically answer yes to all confirmation prompts.")
     parser.add_argument("--dry-run", action="store_true", help="Show what actions would be performed without doing them.")
+    parser.add_argument("--frosted", choices=("none", "clear"), default="clear",
+                        help="Generate the frosted icon theme (Default: clear)")
     args = parser.parse_args()
 
     print(f"\n{BOLD}{CYAN}=== KDE Plasma 6 Dotfiles Installer ==={RESET}\n")
@@ -369,6 +406,10 @@ def main():
 
     # Patch MacTahoe Clear Finder icon
     apply_finder_patch(args.dry_run)
+
+    # Generate frosted icon theme variants
+    frosted_modes = {"none": [], "clear": ["clear"]}[args.frosted]
+    install_frosted_themes(args.dry_run, frosted_modes)
 
     # Refresh KDE caches
     rebuild_caches(args.dry_run)
