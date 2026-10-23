@@ -14,3 +14,8 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Custom build artifacts
+custom-notifications/build/
+custom-notifications/.rcc/
+custom-notifications/.qt/

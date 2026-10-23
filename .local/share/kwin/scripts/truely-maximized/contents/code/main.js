@@ -9,7 +9,7 @@ function shouldHideTitle(window) {
 		return true;
 	} else {
 		var area = workspace.clientArea(KWin.MaximizeArea, window);
-		return Math.ceil(window.width) >= area.width && Math.ceil(window.height) >= area.height;
+		return window.width >= area.width - 1 && window.height >= area.height - 1;
 	}
 }
 
