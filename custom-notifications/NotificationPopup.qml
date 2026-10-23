@@ -182,7 +182,7 @@ NotificationsApplet.NotificationWindow {
             id: draggableDelegate
             anchors {
                 fill: parent
-                topMargin: notificationPopup.modelInterface.closable || notificationPopup.modelInterface.dismissable || notificationPopup.modelInterface.configurable ? -notificationPopup.topPadding : 0
+                topMargin: 0
             }
             leftPadding: 6
             rightPadding: 6
