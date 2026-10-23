@@ -1,42 +1,12 @@
-[PlasmaViews][Panel 105]
+[PlasmaViews][Panel 1056]
 floating=0
 floatingApplets=1
 panelOpacity=2
 panelVisibility=2
 shell=org.kde.plasma.desktop
 
-[PlasmaViews][Panel 105][Defaults]
+[PlasmaViews][Panel 1056][Defaults]
 thickness=32
-
-[PlasmaViews][Panel 132]
-floating=1
-panelLengthMode=1
-panelOpacity=2
-panelVisibility=2
-shell=org.kde.plasma.desktop
-
-[PlasmaViews][Panel 132][Defaults]
-thickness=56
-
-[PlasmaViews][Panel 137]
-floating=1
-panelLengthMode=1
-panelOpacity=2
-panelVisibility=2
-shell=org.kde.plasma.desktop
-
-[PlasmaViews][Panel 137][Defaults]
-thickness=64
-
-[PlasmaViews][Panel 153]
-floating=1
-panelLengthMode=1
-panelOpacity=2
-panelVisibility=2
-shell=org.kde.plasma.desktop
-
-[PlasmaViews][Panel 153][Defaults]
-thickness=54
 
 [PlasmaViews][Panel 2]
 floating=1
@@ -53,16 +23,6 @@ shell=org.kde.plasma.desktop
 
 [PlasmaViews][Panel 220][Defaults]
 thickness=32
-
-[PlasmaViews][Panel 23]
-floating=1
-panelLengthMode=1
-panelOpacity=2
-panelVisibility=2
-shell=org.kde.plasma.desktop
-
-[PlasmaViews][Panel 23][Defaults]
-thickness=54
 
 [PlasmaViews][Panel 47]
 floating=0

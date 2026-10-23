@@ -1,25 +1,28 @@
 [Common]
-ButtonHeight=2
-CornerRadius=10
+ButtonHeight=1
+CornerRadius=8
 ScrollBarTransient=true
 ScrollBarTransientAlwaysShowSlim=true
 ShadowStrength=51
 
 [Style]
-AnimationsDuration=300
+AnimationsDuration=100
 DockWidgetDrawFrame=true
-DolphinSidebarOpacity=50
-DolphinViewOpacity=50
+DocumentModeTabs=true
+DolphinSidebarOpacity=10
+DolphinViewOpacity=10
 FullOutline=true
-KTextEditDrawFrame=true
-MenuBarOpacity=50
+MenuBarOpacity=10
 MenuOpacity=50
+RoundedRubberBandFrame=false
 SidePanelDrawFrame=true
+TabBGColor=0,170,255
 TabBarDrawCenteredTabs=true
+TabUseBrighterCloseIcon=true
 TabUseHighlightColor=true
-TabsHeight=-17
-UnifiedTabBarKonsole=true
+TabsHeight=-15
 WidgetToolBarShadow=true
+renderThinSeperatorBetweenTheScrollBar=true
 
 [Windeco]
 TitleAlignment=AlignCenter

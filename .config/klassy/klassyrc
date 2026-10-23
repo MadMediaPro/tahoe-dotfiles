@@ -163,13 +163,12 @@ TitleSidePadding=4
 
 [Windeco]
 AnimationsEnabled=true
-AnimationsSpeedRelativeSystem=-4
+AnimationsSpeedRelativeSystem=4
 BoldButtonIcons=BoldIconsBold
 ButtonIconStyle=StyleArk
 ButtonShape=ShapeSmallCircle
 ColorizeWindowOutlineWithButton=false
-DrawBackgroundGradient=true
-DrawBorderOnMaximizedWindows=false
+DrawBorderOnMaximizedWindows=true
 DrawTitleBarSeparator=false
 ForceColorizeSystemIcons=true
 IconSize=IconVerySmall
@@ -179,8 +178,7 @@ KwinButtonsOnRight=EHFSM
 MatchTitleBarToApplicationColor=true
 SystemIconSize=SystemIcon18
 UnderlineTitle=false
-UseTitleBarColorForAllBorders=true
-WindowCornerRadius=24
+WindowCornerRadius=21
 version=6.7.3
 
 [WindowOutlineStyle]
@@ -192,8 +190,8 @@ WindowOutlineAccentWithContrastOpacityActive=50
 WindowOutlineAccentWithContrastOpacityInactive=20
 WindowOutlineContrastFromColorSchemeActive=false
 WindowOutlineContrastFromColorSchemeInactive=false
-WindowOutlineContrastOpacityActive=25
-WindowOutlineContrastOpacityInactive=25
+WindowOutlineContrastOpacityActive=0
+WindowOutlineContrastOpacityInactive=0
 WindowOutlineCustomColorActive=0,0,0
 WindowOutlineCustomColorInactive=0,0,0
 WindowOutlineCustomColorOpacityActive=60
@@ -203,4 +201,4 @@ WindowOutlineCustomWithContrastOpacityInactive=25
 WindowOutlineShadowColorOpacity=20
 WindowOutlineStyleActive=WindowOutlineContrast
 WindowOutlineStyleInactive=WindowOutlineContrast
-WindowOutlineThickness=1
+WindowOutlineThickness=2.4
