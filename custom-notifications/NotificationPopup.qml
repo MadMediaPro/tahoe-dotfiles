@@ -18,12 +18,67 @@ import "delegates" as Delegates
 NotificationsApplet.NotificationWindow {
     id: notificationPopup
 
+    // =========================================================================
+    // PENGATURAN DURASI ANIMASI (dalam milidetik / ms)
+    // Ubah angka di bawah ini untuk mengatur kecepatan animasi:
+    // =========================================================================
+    property int enterDuration: 400    // Durasi animasi masuk (default: 400ms)
+    property int exitDuration: 300     // Durasi animasi keluar (default: 300ms)
+    property int moveDuration: 350     // Durasi animasi pergerakan tumpukan (default: 350ms)
+
     property int popupWidth
     property bool showPopupTimeout: false
 
     property bool isFrontCard: true
     readonly property bool isHovered: focusListener.containsMouse || draggableDelegate.hovered
     onIsHoveredChanged: NotificationsApplet.Globals.updateHoverState()
+
+    property bool allowPositionAnimation: false
+
+    Behavior on y {
+        enabled: notificationPopup.allowPositionAnimation
+        NumberAnimation {
+            duration: notificationPopup.moveDuration
+            easing.type: Easing.OutCubic
+        }
+    }
+
+
+    ParallelAnimation {
+        id: enterAnim
+        NumberAnimation {
+            target: notificationPopup.contentItem
+            property: "opacity"
+            from: 0.0
+            to: 1.0
+            duration: notificationPopup.enterDuration
+            easing.type: Easing.OutCubic
+        }
+        NumberAnimation {
+            target: notificationPopup.contentItem
+            property: "scale"
+            from: 0.80
+            to: 1.0
+            duration: notificationPopup.enterDuration
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.08
+        }
+        onFinished: {
+            notificationPopup.allowPositionAnimation = true;
+        }
+    }
+
+    function startEnterAnimation() {
+        enterAnim.restart();
+    }
+
+    Component.onCompleted: {
+        if (contentItem) {
+            contentItem.transformOrigin = Item.Center;
+            contentItem.opacity = 0.0;
+            contentItem.scale = 0.80;
+        }
+    }
 
     // Maximum width the popup can take to not break out of the screen geometry.
     readonly property int availableWidth: NotificationsApplet.Globals.screenRect.width - NotificationsApplet.Globals.popupEdgeDistance * 2 - leftPadding - rightPadding
@@ -168,9 +223,6 @@ NotificationsApplet.NotificationWindow {
                         return false;
                     }
                     if (notificationPopup.isHovered || NotificationsApplet.Globals.anyPopupHovered || NotificationsApplet.Globals.stackExpanded) {
-                        return false;
-                    }
-                    if (!notificationPopup.isFrontCard && !NotificationsApplet.Globals.stackExpanded) {
                         return false;
                     }
                     if (interval <= 0) {

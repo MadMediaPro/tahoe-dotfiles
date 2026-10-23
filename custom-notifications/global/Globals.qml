@@ -509,25 +509,18 @@ QtObject {
                         p.isFrontCard = true;
                         p.y = baseY;
                         p.visible = true;
-                    } else if (k < 3) {
-                        p.isFrontCard = false;
-                        let peekDist = k * peekStep;
-                        if (isTop) {
-                            let targetY = baseY + (popups[0].height - p.height) + peekDist;
-                            p.y = Math.max(baseY + k * 4, targetY);
-                        } else {
-                            let targetY = baseY - (popups[0].height - p.height) - peekDist;
-                            p.y = Math.min(baseY - k * 4, targetY);
-                        }
-                        p.visible = true;
                     } else {
                         p.isFrontCard = false;
+                        const visibleStep = Math.min(k, 2);
+                        const peekDist = visibleStep * peekStep;
                         if (isTop) {
-                            p.y = baseY + (popups[0].height - p.height) + 2 * peekStep;
+                            const targetY = baseY + (popups[0].height - p.height) + peekDist;
+                            p.y = Math.max(baseY + visibleStep * 4, targetY);
                         } else {
-                            p.y = baseY - (popups[0].height - p.height) - 2 * peekStep;
+                            const targetY = baseY - (popups[0].height - p.height) - peekDist;
+                            p.y = Math.min(baseY - visibleStep * 4, targetY);
                         }
-                        p.visible = false;
+                        p.visible = true;
                     }
                 }
 
@@ -873,6 +866,9 @@ QtObject {
             Qt.callLater(() => {
                 globals.positionPopups();
                 object.visible = true;
+                if (object.startEnterAnimation) {
+                    object.startEnterAnimation();
+                }
             });
             globals.popupNotificationsModel.playSoundHint(globals.popupNotificationsModel.index(index, 0));
         }
