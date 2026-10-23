@@ -61,7 +61,7 @@ def find_tile(text: str) -> Optional[str]:
             tag = text[match.start():match.end()]
             if "transform=" in tag or "filter=" in tag or 'fill="none"' in tag:
                 continue
-            values = dict(re.findall(r'\b(x|y|width|height|rx|ry)="([\d.]+)"', tag))
+            values = dict(re.findall(r'(?<!-)\b(x|y|width|height|rx|ry)="([\d.]+)"', tag))
             w = float(values.get("width", 0))
             h = float(values.get("height", 0))
             rx = float(values.get("rx", values.get("ry", 0)))
@@ -105,7 +105,7 @@ def generate_tile_overlay(tile: str, prefix: str, scale: float) -> str:
         return f"{val:.3f}".rstrip("0").rstrip(".")
 
     if tile.startswith("<rect"):
-        attrs = dict(re.findall(r'\b(x|y|width|height|rx|ry)="([\d.]+)"', tile))
+        attrs = dict(re.findall(r'(?<!-)\b(x|y|width|height|rx|ry)="([\d.]+)"', tile))
         x = float(attrs.get("x", 0))
         y = float(attrs.get("y", 0))
         w = float(attrs.get("width", 56))
@@ -215,7 +215,7 @@ def strip_dark_backgrounds(text: str, tile: str, tile_scale: float = 1.0) -> str
     if not tile.startswith("<rect"):
         return text
 
-    attrs = dict(re.findall(r'\b(x|y|width|height|rx|ry)="([\d.]+)"', tile))
+    attrs = dict(re.findall(r'(?<!-)\b(x|y|width|height|rx|ry)="([\d.]+)"', tile))
     tx = float(attrs.get("x", 0)) * tile_scale
     ty = float(attrs.get("y", 0)) * tile_scale
     tw = float(attrs.get("width", 56)) * tile_scale
@@ -226,7 +226,7 @@ def strip_dark_backgrounds(text: str, tile: str, tile_scale: float = 1.0) -> str
         tag = match.group(0)
         if "mtf-bg" in tag or 'fill="none"' in tag:
             return tag
-        values = dict(re.findall(r'\b(x|y|width|height)="([\d.]+)"', tag))
+        values = dict(re.findall(r'(?<!-)\b(x|y|width|height)="([\d.]+)"', tag))
         if not all(k in values for k in ("x", "y", "width", "height")):
             return tag
         x, y, w, h = (float(values[k]) for k in ("x", "y", "width", "height"))

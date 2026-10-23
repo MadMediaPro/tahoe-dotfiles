@@ -7,6 +7,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Optional, Union
+from .battery import is_battery_charging_icon, transform_battery_svg
 from .engine import FrostEngine
 from .overrides import IconOverrides
 
@@ -35,7 +36,7 @@ class ThemeGenerator:
         self,
         src: Union[str, Path],
         dest: Union[str, Path],
-        mode: str = "clear",
+        mode: str = "light",
         cache: bool = True,
         use_overrides: bool = True,
     ):
@@ -56,8 +57,12 @@ class ThemeGenerator:
         if self.src.resolve() == self.dest.resolve():
             raise ValueError("Source and destination theme paths must differ")
 
-        if self.dest.exists():
+        if self.dest.is_symlink():
+            self.dest.unlink()
+        elif self.dest.is_dir():
             shutil.rmtree(self.dest)
+        elif self.dest.exists():
+            self.dest.unlink()
         self.dest.mkdir(parents=True)
 
         stats = ThemeStats()
@@ -68,7 +73,18 @@ class ThemeGenerator:
                 target = current_dest / entry.name
 
                 if entry.is_symlink():
-                    os.symlink(os.readlink(source), target)
+                    raw_target = os.readlink(source)
+                    resolved = source.resolve()
+                    if entry.is_dir():
+                        try:
+                            is_external = not resolved.is_relative_to(self.src.resolve())
+                        except ValueError:
+                            is_external = True
+                        if is_external:
+                            target.mkdir(exist_ok=True)
+                            walk(resolved, target)
+                            continue
+                    os.symlink(raw_target, target)
                     continue
 
                 if entry.is_dir(follow_symlinks=False):
@@ -79,8 +95,24 @@ class ThemeGenerator:
                 if entry.name == "icon-theme.cache":
                     continue
 
-                rel_parts = source.relative_to(self.src).parts
+                try:
+                    rel_parts = source.relative_to(self.src).parts
+                except ValueError:
+                    rel_parts = target.relative_to(self.dest).parts
                 context = rel_parts[0] if rel_parts else ""
+
+                # Battery charging status icons: customize with Apple green inside and white bolt
+                if is_battery_charging_icon(source) and source.suffix.lower() == ".svg":
+                    try:
+                        text = source.read_text(encoding="utf-8", errors="replace")
+                        converted = transform_battery_svg(text)
+                        target.write_text(converted, encoding="utf-8")
+                        stats.converted += 1
+                        if progress_cb:
+                            progress_cb(str(source), "battery-charging")
+                        continue
+                    except Exception:
+                        pass
 
                 # Explicitly skip excluded categories (system tray status indicators, action buttons) or any symbolic icon
                 if context in FROST_EXCLUDED_CONTEXTS or "symbolic" in source.name.lower():
@@ -110,7 +142,11 @@ class ThemeGenerator:
                             and "scalable" in rel_parts
                             and "symbolic" not in source.name.lower()
                         )
-                        converted = self.engine.transform(text, fallback=is_app_scalable)
+                        converted = self.engine.transform(
+                            text,
+                            fallback=is_app_scalable,
+                            icon_name=source.stem,
+                        )
                     except Exception:
                         converted = None
                         stats.failed += 1
@@ -135,9 +171,15 @@ class ThemeGenerator:
         if index.exists():
             content = index.read_text(encoding="utf-8")
             content = re.sub(r"(?m)^Name=.*$", f"Name={self.dest.name}", content)
+            if self.mode == "dark":
+                variant_desc = "dark"
+            elif self.mode in ("frosted-dark", "dark-frosted"):
+                variant_desc = "frosted dark"
+            else:
+                variant_desc = "frosted light"
             content = re.sub(
                 r"(?m)^Comment=.*$",
-                "Comment=macOS Tahoe frosted glass icon theme for Linux.",
+                f"Comment=macOS Tahoe {variant_desc} icon theme for Linux.",
                 content,
             )
             index.write_text(content, encoding="utf-8")
@@ -157,7 +199,7 @@ class ThemeGenerator:
 def generate_theme(
     src: Union[str, Path],
     dest: Union[str, Path],
-    mode: str = "clear",
+    mode: str = "light",
     cache: bool = True,
     use_overrides: bool = True,
 ) -> ThemeStats:

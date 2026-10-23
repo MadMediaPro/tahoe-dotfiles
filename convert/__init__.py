@@ -1,5 +1,6 @@
-"""frosticon: High-performance frosted glass SVG icon transformation library."""
+"""convert: High-performance frosted glass SVG icon transformation library."""
 
+from .battery import is_battery_charging_icon, transform_battery_svg
 from .color import hex_to_rgb, lighten_color, recolor_svg
 from .engine import FrostEngine, frost_svg
 from .geometry import BBox, compute_iou, element_bbox, path_bbox
@@ -22,7 +23,9 @@ __all__ = [
     "generate_theme",
     "generate_tile_overlay",
     "hex_to_rgb",
+    "is_battery_charging_icon",
     "lighten_color",
     "path_bbox",
     "recolor_svg",
+    "transform_battery_svg",
 ]

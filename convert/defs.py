@@ -3,7 +3,12 @@
 import re
 from typing import Optional
 from .color import hex_to_rgb
-from .constants import FROST_DEFS, GLYPH_TONES
+from .constants import (
+    FROST_DEFS_DARK_SOLID,
+    FROST_DEFS_FROSTED_DARK,
+    FROST_DEFS_LIGHT,
+    GLYPH_TONES,
+)
 
 
 def strip_dangling_uses(text: str) -> str:
@@ -67,12 +72,39 @@ def ensure_fill(text: str, prefix: str) -> str:
     return re.sub(r"<(?:path|rect|circle|ellipse|polygon|polyline)\b[^>]*?/?>", repl, text)
 
 
-def build_frost_defs(prefix: str, scale: float, blur: Optional[float] = None) -> str:
+def build_dark_glyph_gradient(prefix: str, top_color: str, bottom_color: str) -> str:
+    """Generate linear gradient for coloring glyphs in dark frosted glass mode."""
+    return (
+        f'<linearGradient id="{prefix}-glyph" x1="0" y1="0" x2="0" y2="1">\n'
+        f'<stop offset="0" stop-color="{top_color}"/>\n'
+        f'<stop offset="1" stop-color="{bottom_color}"/>\n'
+        f'</linearGradient>\n'
+    )
+
+
+def build_frost_defs(
+    prefix: str,
+    scale: float,
+    blur: Optional[float] = None,
+    mode: str = "light",
+    dark_glyph_gradient: Optional[str] = None,
+) -> str:
     """Render the full <defs> block with frosted blur filters and glyph gradients."""
     if blur is None:
         blur = max(0.22, 0.9 * scale)
+    if mode in ("frosted-dark", "dark-frosted"):
+        template = FROST_DEFS_FROSTED_DARK
+    elif mode == "dark":
+        template = FROST_DEFS_DARK_SOLID
+    else:
+        template = FROST_DEFS_LIGHT
+
+    if mode == "dark":
+        glyph_grads = dark_glyph_gradient or ""
+    else:
+        glyph_grads = build_glyph_gradients(prefix)
     return (
-        FROST_DEFS.replace("{p}", prefix)
-        .replace("{gradients}", build_glyph_gradients(prefix))
+        template.replace("{p}", prefix)
+        .replace("{gradients}", glyph_grads)
         .replace("{blur}", f"{blur:.2f}")
     )

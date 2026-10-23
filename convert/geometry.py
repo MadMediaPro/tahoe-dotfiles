@@ -138,7 +138,7 @@ def element_bbox(tag: str) -> Optional[BBox]:
     trans_val = transform.group(1) if transform else None
 
     if tag.startswith("<rect"):
-        values = dict(re.findall(r'\b(x|y|width|height)="([\d.]+)"', tag))
+        values = dict(re.findall(r'(?<!-)\b(x|y|width|height)="([\d.]+)"', tag))
         x = float(values.get("x", 0))
         y = float(values.get("y", 0))
         w = float(values.get("width", 0))

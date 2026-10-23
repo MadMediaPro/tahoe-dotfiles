@@ -1,4 +1,4 @@
-"""Command line interface for frosticon."""
+"""Command line interface for convert."""
 
 import argparse
 import sys
@@ -15,19 +15,19 @@ def main(args=None):
     )
     parser.add_argument(
         "--src",
-        default=str(Path.home() / ".local/share/icons/MacTahoe"),
-        help="Path to source upstream icon theme (default: ~/.local/share/icons/MacTahoe)",
+        default=None,
+        help="Path to source upstream icon theme (default: auto-detected based on mode)",
     )
     parser.add_argument(
         "--dest",
-        default=str(Path.home() / ".local/share/icons/MacTahoe-Frosted"),
-        help="Path to output destination theme (default: ~/.local/share/icons/MacTahoe-Frosted)",
+        default=None,
+        help="Path to output destination theme (default: auto-detected based on mode)",
     )
     parser.add_argument(
         "--mode",
-        choices=("clear", "tint"),
-        default="clear",
-        help="Visual style: 'clear' (pearl/monochrome glass) or 'tint' (tinted glass) (default: clear)",
+        choices=("light", "dark", "frosted-dark", "clear", "tint"),
+        default="light",
+        help="Visual style: 'light' (frosted light pearl glass), 'dark' (MacTahoe Dark solid obsidian), 'frosted-dark' (MacTahoe Frosted Dark translucent smoked glass), 'clear', or 'tint' (default: light)",
     )
     parser.add_argument(
         "--no-cache",
@@ -80,8 +80,20 @@ def main(args=None):
         return
 
     # Full theme generation mode
-    src_path = Path(parsed.src)
-    dest_path = Path(parsed.dest)
+    if parsed.dest:
+        dest_path = Path(parsed.dest)
+    else:
+        if parsed.mode == "dark":
+            dest_path = Path.home() / ".local/share/icons/MacTahoe-dark"
+        elif parsed.mode in ("frosted-dark", "dark-frosted"):
+            dest_path = Path.home() / ".local/share/icons/MacTahoe-Frosted-Dark"
+        else:
+            dest_path = Path.home() / ".local/share/icons/MacTahoe-Frosted-Light"
+
+    if parsed.src:
+        src_path = Path(parsed.src)
+    else:
+        src_path = Path.home() / ".local/share/icons/MacTahoe"
 
     if not src_path.is_dir():
         print(f"Error: Source theme directory '{src_path}' does not exist.", file=sys.stderr)

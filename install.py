@@ -242,35 +242,46 @@ def install_frosted_themes(dry_run: bool, modes):
     if not modes:
         return
 
-    src = HOME_DIR / ".local/share/icons/MacTahoe"
     icons_dir = HOME_DIR / ".local/share/icons"
     script = REPO_DIR / "frostify.py"
 
-    if not src.exists():
-        log_warn("MacTahoe icon theme not found at ~/.local/share/icons/MacTahoe.")
-        log_warn("Please install MacTahoe first, then re-run to generate frosted variants.")
-        return
-
-    names = {"clear": "MacTahoe-Frosted"}
+    names = {
+        "light": "MacTahoe-Frosted-Light",
+        "dark": "MacTahoe-dark",
+        "frosted-dark": "MacTahoe-Frosted-Dark",
+        "clear": "MacTahoe-Frosted-Light",
+    }
     for mode in modes:
-        name = names[mode]
+        name = names.get(mode, f"MacTahoe-Frosted-{mode.capitalize()}")
         dest = icons_dir / name
-        log_info(f"Generating frosted icon theme: {name} ({mode})...")
+        src = icons_dir / "MacTahoe"
+
+        if not src.exists():
+            log_warn(f"Source icon theme not found at {src}. Skipping {name}.")
+            continue
+
+        log_info(f"Generating frosted icon theme: {name} ({mode}) from {src.name}...")
 
         if dry_run:
             log_info(f"[Dry-Run] Would generate {dest} from {src}")
             continue
 
         try:
-            # Import and invoke the modular frosticon library directly
+            # Import and invoke the modular convert library directly
             if str(REPO_DIR) not in sys.path:
                 sys.path.insert(0, str(REPO_DIR))
-            from frosticon import generate_theme
+            from convert import generate_theme
             stats = generate_theme(src, dest, mode=mode, cache=True, use_overrides=True)
             log_success(
                 f"Generated {dest.relative_to(HOME_DIR)} "
                 f"({stats.converted} converted, {stats.copied} copied, {stats.overridden} custom overrides)"
             )
+            # Compatibility symlink MacTahoe-Frosted -> MacTahoe-Frosted-Light
+            if mode in ("light", "clear"):
+                compat = icons_dir / "MacTahoe-Frosted"
+                if compat.is_symlink() or not compat.exists():
+                    compat.unlink(missing_ok=True)
+                    compat.symlink_to(name)
         except Exception as err:
             # Fallback to frostify CLI if direct import has issues
             log_warn(f"Direct library call encountered: {err}. Falling back to CLI...")
@@ -381,8 +392,8 @@ def main():
     parser.add_argument("--install-pkgs", action="store_true", help="Automatically install missing packages without prompting.")
     parser.add_argument("-y", "--yes", action="store_true", help="Automatically answer yes to all confirmation prompts.")
     parser.add_argument("--dry-run", action="store_true", help="Show what actions would be performed without doing them.")
-    parser.add_argument("--frosted", choices=("none", "clear"), default="clear",
-                        help="Generate the frosted icon theme (Default: clear)")
+    parser.add_argument("--frosted", choices=("none", "light", "dark", "frosted-dark", "all"), default="all",
+                        help="Generate frosted icon theme variants: light, dark, frosted-dark, or all (Default: all)")
     args = parser.parse_args()
 
     print(f"\n{BOLD}{CYAN}=== KDE Plasma 6 Dotfiles Installer ==={RESET}\n")
@@ -417,7 +428,13 @@ def main():
     apply_finder_patch(args.dry_run)
 
     # Generate frosted icon theme variants
-    frosted_modes = {"none": [], "clear": ["clear"]}[args.frosted]
+    frosted_modes = {
+        "none": [],
+        "light": ["light"],
+        "dark": ["dark"],
+        "frosted-dark": ["frosted-dark"],
+        "all": ["light", "dark", "frosted-dark"],
+    }[args.frosted]
     install_frosted_themes(args.dry_run, frosted_modes)
 
     # Refresh KDE caches
