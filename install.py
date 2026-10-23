@@ -251,10 +251,6 @@ def install_frosted_themes(dry_run: bool, modes):
         log_warn("Please install MacTahoe first, then re-run to generate frosted variants.")
         return
 
-    if not script.exists():
-        log_warn(f"Frosted icon generator not found at {script}")
-        return
-
     names = {"clear": "MacTahoe-Frosted"}
     for mode in modes:
         name = names[mode]
@@ -265,13 +261,26 @@ def install_frosted_themes(dry_run: bool, modes):
             log_info(f"[Dry-Run] Would generate {dest} from {src}")
             continue
 
-        result = subprocess.run(
-            [sys.executable, str(script), "--src", str(src), "--dest", str(dest), "--mode", mode]
-        )
-        if result.returncode == 0:
-            log_success(f"Generated: {dest.relative_to(HOME_DIR)}")
-        else:
-            log_error(f"Failed to generate {name}")
+        try:
+            # Import and invoke the modular frosticon library directly
+            if str(REPO_DIR) not in sys.path:
+                sys.path.insert(0, str(REPO_DIR))
+            from frosticon import generate_theme
+            stats = generate_theme(src, dest, mode=mode, cache=True, use_overrides=True)
+            log_success(
+                f"Generated {dest.relative_to(HOME_DIR)} "
+                f"({stats.converted} converted, {stats.copied} copied, {stats.overridden} custom overrides)"
+            )
+        except Exception as err:
+            # Fallback to frostify CLI if direct import has issues
+            log_warn(f"Direct library call encountered: {err}. Falling back to CLI...")
+            result = subprocess.run(
+                [sys.executable, str(script), "--src", str(src), "--dest", str(dest), "--mode", mode]
+            )
+            if result.returncode == 0:
+                log_success(f"Generated: {dest.relative_to(HOME_DIR)}")
+            else:
+                log_error(f"Failed to generate {name}")
 
 def ensure_fonts(dry_run: bool):
     fonts_dir = HOME_DIR / ".local/share/fonts/apple-san-francisco-pro-fonts"
