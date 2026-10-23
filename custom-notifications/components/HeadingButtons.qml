@@ -179,6 +179,15 @@ RowLayout {
         id: closeButton
         visible: headingButtons.modelInterface.closable
         icon.name: "window-close"
+        opacity: (!headingButtons.modelInterface.inHistory) ? ((headingButtons.modelInterface.cardHovered || closeButton.hovered) ? 1.0 : 0.0) : 1.0
+        enabled: opacity > 0
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: Kirigami.Units.shortDuration
+                easing.type: Easing.InOutQuad
+            }
+        }
 
         display: PlasmaComponents3.AbstractButton.IconOnly
         text: closeButtonToolTip.text

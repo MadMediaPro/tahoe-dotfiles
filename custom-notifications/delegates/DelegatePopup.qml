@@ -35,6 +35,7 @@ BaseDelegate {
 
     PlasmaExtras.PlasmoidHeading {
         id: heading
+        background: Item {}
         topInset: 0
         Layout.fillWidth: true
         Layout.columnSpan: delegateRoot.__firstColumn + 2
@@ -63,7 +64,7 @@ BaseDelegate {
         Layout.rightMargin: -delegateRoot.modelInterface.popupRightPadding
         implicitHeight: 2
         implicitWidth: -1
-        visible: !criticalNotificationIndicator.visible && Notifications.Globals.notificationSettings.showPopupTimeout
+        visible: false
 
         Rectangle {
             readonly property real completionFraction: {
@@ -100,7 +101,7 @@ BaseDelegate {
     Components.Summary {
         id: summary
         // Base layout intentionally has no row spacing, so add top padding here when needed
-        Layout.topMargin: delegateRoot.hasBodyText || icon.visible ? Kirigami.Units.smallSpacing : 0
+        Layout.topMargin: 6
         Layout.fillWidth: true
         Layout.row: 2
         Layout.column: delegateRoot.__firstColumn
@@ -127,7 +128,8 @@ BaseDelegate {
 
     KQuickControlsAddons.MouseEventListener {
         // Base layout intentionally has no row spacing, so add top padding here when needed
-        Layout.topMargin: summary.visible ? 0 : Kirigami.Units.smallSpacing
+        Layout.topMargin: 6
+        Layout.bottomMargin: 6
         Layout.fillWidth: true
         Layout.fillHeight: true
         Layout.row: summary.visible ? 3 : 2

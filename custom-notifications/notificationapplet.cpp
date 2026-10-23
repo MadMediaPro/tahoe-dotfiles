@@ -5,6 +5,7 @@
 */
 
 #include "notificationapplet.h"
+#include "screenhelper.h"
 
 #include <QGuiApplication>
 #include <QJSEngine>
@@ -84,13 +85,7 @@ QQuickItem *NotificationApplet::systemTrayRepresentation() const
 
 bool NotificationApplet::isPrimaryScreen(const QRect &rect) const
 {
-    QScreen *screen = QGuiApplication::primaryScreen();
-    if (!screen) {
-        return false;
-    }
-
-    // HACK
-    return rect == screen->geometry();
+    return ScreenHelper::instance()->isPrimaryScreen(rect);
 }
 
 void NotificationApplet::forceActivateWindow(QWindow *window)

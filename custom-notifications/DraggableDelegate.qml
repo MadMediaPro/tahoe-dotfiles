@@ -20,7 +20,7 @@ T.SwipeDelegate {
     }
 
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
-    implicitHeight: contentItem.implicitHeight
+    implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
     leftPadding: Kirigami.Units.largeSpacing
     rightPadding: Kirigami.Units.largeSpacing
 

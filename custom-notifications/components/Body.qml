@@ -21,7 +21,7 @@ Kirigami.SelectableLabel {
     leftPadding: 0
     rightPadding: 0
     topPadding: 0
-    bottomPadding: 0
+    bottomPadding: 6
 
     // Default WordWrap fails for long unbroken text e.g. URLs
     wrapMode: TextEdit.Wrap

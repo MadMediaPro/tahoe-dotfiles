@@ -15,6 +15,7 @@ include(ECMQmlModule)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick WaylandClient)
 find_package(KF6 REQUIRED COMPONENTS Config CoreAddons GlobalAccel I18n Notifications Service KIO)
+find_package(KF6Screen REQUIRED)
 find_package(Plasma REQUIRED)
 find_package(PlasmaQuick REQUIRED)
 find_package(LibNotificationManager REQUIRED)
@@ -28,6 +29,7 @@ add_definitions(-DTRANSLATION_DOMAIN=\"plasma_applet_org.kde.plasma.notification
 set(notificationapplet_SRCS
     notificationapplet.cpp
     notificationwindow.cpp
+    screenhelper.cpp
     draghelper.cpp
     fileinfo.cpp
     filemenu.cpp
@@ -36,6 +38,7 @@ set(notificationapplet_SRCS
     thumbnailer.cpp
     notificationapplet.h
     notificationwindow.h
+    screenhelper.h
     draghelper.h
     fileinfo.h
     filemenu.h
@@ -119,6 +122,7 @@ target_link_libraries(org.kde.plasma.notifications PRIVATE
                       KF6::Service
                       PW::LibNotificationManager
                       Wayland::Client
+                      KF6::Screen
                       )
 
 ecm_qt_declare_logging_category(org.kde.plasma.notifications

@@ -19,7 +19,11 @@ NotificationsApplet.NotificationWindow {
     id: notificationPopup
 
     property int popupWidth
-    property bool showPopupTimeout
+    property bool showPopupTimeout: false
+
+    property bool isFrontCard: true
+    readonly property bool isHovered: focusListener.containsMouse || draggableDelegate.hovered
+    onIsHoveredChanged: NotificationsApplet.Globals.updateHoverState()
 
     // Maximum width the popup can take to not break out of the screen geometry.
     readonly property int availableWidth: NotificationsApplet.Globals.screenRect.width - NotificationsApplet.Globals.popupEdgeDistance * 2 - leftPadding - rightPadding
@@ -62,6 +66,7 @@ NotificationsApplet.NotificationWindow {
         property bool wantsFocus: false
 
         implicitWidth: Math.min(Math.max(notificationPopup.minimumContentWidth, notificationItem.Layout.preferredWidth), Math.max(notificationPopup.minimumContentWidth, notificationPopup.maximumContentWidth))
+        width: implicitWidth
         implicitHeight: notificationItem.implicitHeight
 
         acceptedButtons: Qt.AllButtons
@@ -119,12 +124,15 @@ NotificationsApplet.NotificationWindow {
         }
 
         DraggableDelegate {
+            id: draggableDelegate
             anchors {
                 fill: parent
                 topMargin: notificationPopup.modelInterface.closable || notificationPopup.modelInterface.dismissable || notificationPopup.modelInterface.configurable ? -notificationPopup.topPadding : 0
             }
-            leftPadding: 0
-            rightPadding: 0
+            leftPadding: 6
+            rightPadding: 6
+            topPadding: 0
+            bottomPadding: 0
             hoverEnabled: true
             draggable: notificationItem.modelInterface.notificationType != NotificationManager.Notifications.JobType
             onDismissRequested: NotificationsApplet.Globals.popupNotificationsModel.close(NotificationsApplet.Globals.popupNotificationsModel.index(notificationItem.modelInterface.index, 0))
@@ -159,7 +167,10 @@ NotificationsApplet.NotificationWindow {
                     if (!notificationPopup.visible) {
                         return false;
                     }
-                    if (focusListener.containsMouse) {
+                    if (notificationPopup.isHovered || NotificationsApplet.Globals.anyPopupHovered || NotificationsApplet.Globals.stackExpanded) {
+                        return false;
+                    }
+                    if (!notificationPopup.isFrontCard && !NotificationsApplet.Globals.stackExpanded) {
                         return false;
                     }
                     if (interval <= 0) {
@@ -196,6 +207,10 @@ NotificationsApplet.NotificationWindow {
                 id: notificationItem
 
                 Layout.preferredHeight: implicitHeight // Why is this necessary?
+                opacity: (!notificationPopup.isFrontCard && !NotificationsApplet.Globals.stackExpanded) ? 0.0 : 1.0
+                Behavior on opacity {
+                    NumberAnimation { duration: Kirigami.Units.shortDuration }
+                }
 
                 modelInterface {
                     maximumLineCount: 8
@@ -214,6 +229,7 @@ NotificationsApplet.NotificationWindow {
                     }
                     timeout: timer.running ? timer.interval : 0
 
+                    cardHovered: notificationPopup.isHovered
                     closable: true
 
                     onBodyClicked: {

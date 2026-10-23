@@ -125,24 +125,36 @@ QtObject {
     }
 
     readonly property rect screenRect: {
-        if (!plasmoid) {
-            return Qt.rect(0, 0, -1, -1);
+        let rect = Qt.rect(0, 0, -1, -1);
+
+        if (plasmoid && plasmoid.containment) {
+            const containment = plasmoid.containment;
+            if (containment.availableScreenRect && containment.availableScreenRect.width > 0 && containment.availableScreenRect.height > 0) {
+                rect = Qt.rect(containment.screenGeometry.x + containment.availableScreenRect.x,
+                               containment.screenGeometry.y + containment.availableScreenRect.y,
+                               containment.availableScreenRect.width,
+                               containment.availableScreenRect.height);
+            }
         }
 
-        const containment = plasmoid.containment;
-        if (!containment) {
-            return Qt.rect(0, 0, -1, -1);
+        if (rect.width <= 0 || rect.height <= 0) {
+            var pScreen = Notifications.ScreenHelper.primaryScreen;
+            if (pScreen && pScreen.geometry.width > 0) {
+                rect = Qt.rect(pScreen.geometry.x, pScreen.geometry.y, pScreen.geometry.width, pScreen.geometry.height);
+            }
         }
-        // NOTE this is our "plasmoid" property from above, don't port this to Plasmoid attached property!
-        let rect = Qt.rect(containment.screenGeometry.x + containment.availableScreenRect.x,
-                           containment.screenGeometry.y + containment.availableScreenRect.y,
-                           containment.availableScreenRect.width,
-                           containment.availableScreenRect.height);
+
+        if (rect.width <= 0 || rect.height <= 0) {
+            var geom = Notifications.ScreenHelper.primaryGeometry;
+            if (geom && geom.width > 0 && geom.height > 0) {
+                rect = Qt.rect(geom.x, geom.y, geom.width, geom.height);
+            }
+        }
 
         // When no explicit screen corner is configured,
         // restrict notification popup position by horizontal panel width
         if (visualParent && notificationSettings.popupPosition === NotificationManager.Settings.CloseToWidget
-            && plasmoid.formFactor === PlasmaCore.Types.Horizontal) {
+            && plasmoid && plasmoid.formFactor === PlasmaCore.Types.Horizontal) {
             const visualParentWindow = visualParent.Window.window;
             if (visualParentWindow) {
                 const left = Math.max(rect.left, visualParentWindow.x);
@@ -241,8 +253,8 @@ QtObject {
                 ++score;
             }
 
-            // Prefer plasmoids on primary/laptop screen (eDP)
-            if (plasmoid && plasmoid.containment && plasmoid.containment.screenGeometry.x >= 1700 && plasmoid.containment.screenGeometry.x <= 1800) {
+            // Prefer plasmoids on primary screen (dynamically detected via KScreen)
+            if (plasmoid && plasmoid.containment && plasmoid.isPrimaryScreen(plasmoid.containment.screenGeometry)) {
                 score += 10;
             } else if (plasmoid && plasmoid.containment.screen === 0) {
                 ++score;
@@ -320,119 +332,249 @@ QtObject {
                 && rect2.y < rect1.y + rect1.height;
     }
 
-    function positionPopups() {
-        if (!plasmoid) {
-            return;
-        }
+    property bool stackExpanded: false
+    property bool anyPopupHovered: false
 
-        const screenRect = globals.screenRect;
-        if (screenRect.width <= 0 || screenRect.height <= 0) {
-            return;
-        }
-        if (!globals.visualParent) {
-            return;
-        }
-
-        let effectivePopupLocation = popupLocation;
-
-        const visualParent = globals.visualParent;
-        const visualParentWindow = visualParent.Window.window;
-
-        // When no horizontal alignment is specified, place it depending on which half of the *panel*
-        // the notification plasmoid is in
-        if (visualParentWindow) {
-            if (!(effectivePopupLocation & (Qt.AlignLeft | Qt.AlignHCenter | Qt.AlignRight))) {
-                const iconHCenter = visualParent.mapToItem(null /*mapToScene*/, 0, 0).x + visualParent.width / 2;
-
-                if (iconHCenter < visualParentWindow.width / 2) {
-                    effectivePopupLocation |= Qt.AlignLeft;
-                } else {
-                    effectivePopupLocation |= Qt.AlignRight;
-                }
+    property Timer collapseTimer: Timer {
+        id: collapseTimer
+        interval: 350
+        repeat: false
+        onTriggered: {
+            if (!globals.anyPopupHovered) {
+                globals.stackExpanded = false;
+                globals.positionPopups();
             }
         }
+    }
 
-        // When no vertical alignment is specified, place it depending on which half of the *screen*
-        // the notification plasmoid is in
-        if (!(effectivePopupLocation & (Qt.AlignTop | Qt.AlignBottom))) {
-            const screenVCenter = screenRect.y + screenRect.height / 2;
-            const iconVCenter = visualParent.mapToGlobal(0, visualParent.height / 2).y;
-
-            if (iconVCenter < screenVCenter) {
-                effectivePopupLocation |= Qt.AlignTop;
-            } else {
-                effectivePopupLocation |= Qt.AlignBottom;
-            }
-        }
-
-        let y = screenRect.y;
-        if (effectivePopupLocation & Qt.AlignBottom) {
-            y += screenRect.height - popupEdgeDistance;
-        } else {
-            y += popupEdgeDistance;
-        }
-
+    function updateHoverState() {
+        let hovered = false;
         for (var i = 0; i < popupInstantiator.count; ++i) {
-            let popup = popupInstantiator.objectAt(i);
-            if (!popup) {
-                continue;
+            var p = popupInstantiator.objectAt(i);
+            if (p && p.isHovered) {
+                hovered = true;
+                break;
+            }
+        }
+
+        globals.anyPopupHovered = hovered;
+
+        if (hovered) {
+            collapseTimer.stop();
+            if (!globals.stackExpanded) {
+                globals.stackExpanded = true;
+                globals.positionPopups();
+            }
+        } else {
+            if (globals.stackExpanded) {
+                collapseTimer.restart();
+            }
+        }
+    }
+
+    function getPopupTime(p) {
+        if (!p) return 0;
+        if (p.updated && !isNaN(p.updated.getTime()) && p.updated.getTime() > 0) {
+            return p.updated.getTime();
+        }
+        if (p.created && !isNaN(p.created.getTime()) && p.created.getTime() > 0) {
+            return p.created.getTime();
+        }
+        if (p.modelInterface && p.modelInterface.time) {
+            let t = p.modelInterface.time;
+            if (t instanceof Date && !isNaN(t.getTime())) {
+                return t.getTime();
+            }
+        }
+        return (p.index !== undefined ? p.index : 0);
+    }
+
+    function positionPopups() {
+        try {
+            if (!plasmoid) {
+                return;
             }
 
-            for (var sIdx = 0; sIdx < Qt.application.screens.length; ++sIdx) {
-                var scr = Qt.application.screens[sIdx];
-                if (scr.name.indexOf("eDP") !== -1) {
-                    popup.screen = scr;
-                    break;
+            let screenRect = globals.screenRect;
+            if (screenRect.width <= 0 || screenRect.height <= 0) {
+                var pScreenFallback = Notifications.ScreenHelper.primaryScreen;
+                if (pScreenFallback && pScreenFallback.geometry.width > 0) {
+                    screenRect = Qt.rect(pScreenFallback.geometry.x, pScreenFallback.geometry.y, pScreenFallback.geometry.width, pScreenFallback.geometry.height);
+                }
+            }
+            if (screenRect.width <= 0 || screenRect.height <= 0) {
+                return;
+            }
+            if (!globals.visualParent) {
+                return;
+            }
+
+            let effectivePopupLocation = popupLocation;
+
+            const visualParent = globals.visualParent;
+            const visualParentWindow = visualParent.Window.window;
+
+            // When no horizontal alignment is specified, place it depending on which half of the *panel*
+            // the notification plasmoid is in
+            if (visualParentWindow) {
+                if (!(effectivePopupLocation & (Qt.AlignLeft | Qt.AlignHCenter | Qt.AlignRight))) {
+                    const iconHCenter = visualParent.mapToItem(null /*mapToScene*/, 0, 0).x + visualParent.width / 2;
+
+                    if (iconHCenter < visualParentWindow.width / 2) {
+                        effectivePopupLocation |= Qt.AlignLeft;
+                    } else {
+                        effectivePopupLocation |= Qt.AlignRight;
+                    }
                 }
             }
 
+            // When no vertical alignment is specified, place it depending on which half of the *screen*
+            // the notification plasmoid is in
+            if (!(effectivePopupLocation & (Qt.AlignTop | Qt.AlignBottom))) {
+                const screenVCenter = screenRect.y + screenRect.height / 2;
+                const iconVCenter = visualParent.mapToGlobal(0, visualParent.height / 2).y;
 
-            const leftMostX = screenRect.x + popupEdgeDistance;
-            const rightMostX = screenRect.x + screenRect.width - popupEdgeDistance - popup.width;
-
-            // If available screen rect is narrower than the popup, center it in the available rect
-            if (screenRect.width < popup.width || effectivePopupLocation & Qt.AlignHCenter) {
-                popup.x = screenRect.x + (screenRect.width - popup.width) / 2
-            } else if (effectivePopupLocation & Qt.AlignLeft) {
-                popup.x = leftMostX;
-            } else if (effectivePopupLocation & Qt.AlignRight) {
-                popup.x = rightMostX;
-            }
-
-            if (effectivePopupLocation & Qt.AlignTop) {
-                // We want to calculate the new position based on its original target position to avoid positioning it and then
-                // positioning it again, hence the temporary Qt.rect with explicit "y" and not just the popup as a whole
-                if (obstructingDialog && obstructingDialog.visible
-                        && rectIntersect(obstructingDialog, Qt.rect(popup.x, y, popup.width, popup.height))) {
-                    y = obstructingDialog.y + obstructingDialog.height + popupEdgeDistance;
-                }
-                popup.y = y;
-                // If the popup isn't ready yet, ignore its occupied space for now.
-                // We'll reposition everything in onHeightChanged eventually.
-                y += popup.height + (popup.height > 0 ? popupSpacing : 0);
-            } else {
-                y -= popup.height;
-                if (obstructingDialog && obstructingDialog.visible
-                        && rectIntersect(obstructingDialog, Qt.rect(popup.x, y, popup.width, popup.height))) {
-                    y = obstructingDialog.y - popup.height - popupEdgeDistance;
-                }
-                popup.y = y;
-                if (popup.height > 0) {
-                    y -= popupSpacing;
-                }
-            }
-
-            // don't let notifications take more than popupMaximumScreenFill of the screen
-            var visible = true;
-            if (i > 0) { // however always show at least one popup
-                if (effectivePopupLocation & Qt.AlignTop) {
-                    visible = (popup.y + popup.height < screenRect.y + (screenRect.height * popupMaximumScreenFill));
+                if (iconVCenter < screenVCenter) {
+                    effectivePopupLocation |= Qt.AlignTop;
                 } else {
-                    visible = (popup.y > screenRect.y + (screenRect.height * (1 - popupMaximumScreenFill)));
+                    effectivePopupLocation |= Qt.AlignBottom;
                 }
             }
 
-            popup.visible = visible;
+            // Collect all active popups
+            let popups = [];
+            for (var i = 0; i < popupInstantiator.count; ++i) {
+                let p = popupInstantiator.objectAt(i);
+                if (p) {
+                    popups.push(p);
+                }
+            }
+
+            if (popups.length === 0) {
+                return;
+            }
+
+            if (popups.length <= 1) {
+                globals.stackExpanded = false;
+            }
+
+            // Sort descending by timestamp (newest first)
+            popups.sort(function (a, b) {
+                let diff = getPopupTime(b) - getPopupTime(a);
+                if (diff !== 0) return diff;
+                return (b.index || 0) - (a.index || 0);
+            });
+
+            const pScreen = Notifications.ScreenHelper.primaryScreen;
+            const isTop = (effectivePopupLocation & Qt.AlignTop);
+            const peekStep = Math.max(12, Math.round(Kirigami.Units.gridUnit * 0.75)); // ~14px
+
+            let baseY = screenRect.y;
+            if (!isTop) {
+                baseY += screenRect.height - popupEdgeDistance;
+            } else {
+                baseY += popupEdgeDistance;
+            }
+
+            if (obstructingDialog && obstructingDialog.visible) {
+                if (isTop) {
+                    const dialogBottom = obstructingDialog.y + obstructingDialog.height + popupEdgeDistance;
+                    if (baseY < dialogBottom) {
+                        baseY = dialogBottom;
+                    }
+                } else {
+                    const dialogTop = obstructingDialog.y - popupEdgeDistance;
+                    if (baseY > dialogTop) {
+                        baseY = dialogTop;
+                    }
+                }
+            }
+
+            if (!globals.stackExpanded && popups.length >= 2) {
+                // Stacked mode: popups[0] on top, popups[k] (k>=1) underneath
+                for (let k = 0; k < popups.length; ++k) {
+                    let p = popups[k];
+
+                    const leftMostX = screenRect.x + popupEdgeDistance;
+                    const rightMostX = screenRect.x + screenRect.width - popupEdgeDistance - p.width;
+                    if (screenRect.width < p.width || effectivePopupLocation & Qt.AlignHCenter) {
+                        p.x = screenRect.x + (screenRect.width - p.width) / 2;
+                    } else if (effectivePopupLocation & Qt.AlignLeft) {
+                        p.x = leftMostX;
+                    } else {
+                        p.x = rightMostX;
+                    }
+
+                    if (k === 0) {
+                        p.isFrontCard = true;
+                        p.y = baseY;
+                        p.visible = true;
+                    } else if (k < 3) {
+                        p.isFrontCard = false;
+                        let peekDist = k * peekStep;
+                        if (isTop) {
+                            let targetY = baseY + (popups[0].height - p.height) + peekDist;
+                            p.y = Math.max(baseY + k * 4, targetY);
+                        } else {
+                            let targetY = baseY - (popups[0].height - p.height) - peekDist;
+                            p.y = Math.min(baseY - k * 4, targetY);
+                        }
+                        p.visible = true;
+                    } else {
+                        p.isFrontCard = false;
+                        if (isTop) {
+                            p.y = baseY + (popups[0].height - p.height) + 2 * peekStep;
+                        } else {
+                            p.y = baseY - (popups[0].height - p.height) - 2 * peekStep;
+                        }
+                        p.visible = false;
+                    }
+                }
+
+                // Raise in order from oldest to newest so newest (popups[0]) is on top
+                for (let i = popups.length - 1; i >= 0; --i) {
+                    if (popups[i].raise) {
+                        popups[i].raise();
+                    }
+                }
+            } else {
+                // Expanded / Single card mode: unfold vertically
+                let currentY = baseY;
+
+                for (let k = 0; k < popups.length; ++k) {
+                    let p = popups[k];
+
+                    const leftMostX = screenRect.x + popupEdgeDistance;
+                    const rightMostX = screenRect.x + screenRect.width - popupEdgeDistance - p.width;
+                    if (screenRect.width < p.width || effectivePopupLocation & Qt.AlignHCenter) {
+                        p.x = screenRect.x + (screenRect.width - p.width) / 2;
+                    } else if (effectivePopupLocation & Qt.AlignLeft) {
+                        p.x = leftMostX;
+                    } else {
+                        p.x = rightMostX;
+                    }
+
+                    p.isFrontCard = true;
+
+                    if (isTop) {
+                        p.y = currentY;
+                        var fits = (currentY + p.height < screenRect.y + (screenRect.height * popupMaximumScreenFill));
+                        p.visible = (k === 0) || fits;
+                        if (p.height > 0) {
+                            currentY += p.height + popupSpacing;
+                        }
+                    } else {
+                        p.y = currentY - p.height;
+                        var fits = (p.y > screenRect.y + (screenRect.height * (1 - popupMaximumScreenFill)));
+                        p.visible = (k === 0) || fits;
+                        if (p.height > 0) {
+                            currentY -= (p.height + popupSpacing);
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.error("STACK_ERROR: " + e + "\n" + (e.stack || ""));
         }
     }
 
@@ -692,7 +834,7 @@ QtObject {
                 }
             }
             // popup width is fixed
-            onHeightChanged: globals.positionPopups()
+            onHeightChanged: Qt.callLater(globals.positionPopups)
 
             Component.onCompleted: {
                 if (globals.inhibited) {
@@ -728,8 +870,10 @@ QtObject {
             }
         }
         onObjectAdded: (index, object) => {
-            globals.positionPopups();
-            object.visible = true;
+            Qt.callLater(() => {
+                globals.positionPopups();
+                object.visible = true;
+            });
             globals.popupNotificationsModel.playSoundHint(globals.popupNotificationsModel.index(index, 0));
         }
         onObjectRemoved: (index, object) => {
@@ -738,6 +882,8 @@ QtObject {
             // cannot use QModelIndex here as the model row is already gone
             globals.popupNotificationsModel.startTimeout(notificationId);
 
+            Qt.callLater(globals.updateHoverState);
+            Qt.callLater(globals.positionPopups);
             globals.repositionTimer.start();
         }
     }

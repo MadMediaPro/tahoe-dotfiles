@@ -4,6 +4,7 @@
 */
 
 #include "notificationwindow.h"
+#include "screenhelper.h"
 
 #include <KWindowSystem>
 #include <KX11Extras>
@@ -14,21 +15,12 @@
 NotificationWindow::NotificationWindow()
     : PlasmaQuick::PlasmaWindow()
 {
-    QScreen *targetScreen = nullptr;
-    for (QScreen *s : QGuiApplication::screens()) {
-        if (s->name().contains(QStringLiteral("eDP"))) {
-            targetScreen = s;
-            break;
-        }
-    }
-    if (!targetScreen) {
-        targetScreen = QGuiApplication::primaryScreen();
-    }
+    QScreen *targetScreen = ScreenHelper::instance()->primaryScreen();
     if (targetScreen) {
         setScreen(targetScreen);
         // Initialize x and y within targetScreen geometry so Qt doesn't associate with (0,0) screen
         setX(targetScreen->geometry().x() + targetScreen->geometry().width() - 380);
-        setY(targetScreen->geometry().y() + 40);
+        setY(targetScreen->geometry().y() + 45);
     }
 
     PlasmaShellWaylandIntegration::get(this)->setRole(QtWayland::org_kde_plasma_surface::role_notification);
@@ -40,11 +32,20 @@ NotificationWindow::NotificationWindow()
     }
 
     auto updatePosition = [this]() {
-        PlasmaShellWaylandIntegration::get(this)->setPosition(QPoint(x(), y()));
+        if (isVisible()) {
+            PlasmaShellWaylandIntegration::get(this)->setPosition(QPoint(x(), y()));
+        }
     };
     connect(this, &QWindow::xChanged, this, updatePosition);
     connect(this, &QWindow::yChanged, this, updatePosition);
     connect(this, &QWindow::screenChanged, this, updatePosition);
+
+    connect(ScreenHelper::instance(), &ScreenHelper::primaryScreenChanged, this, [this]() {
+        QScreen *target = ScreenHelper::instance()->primaryScreen();
+        if (target && screen() != target) {
+            setScreen(target);
+        }
+    });
 }
 
 NotificationWindow::~NotificationWindow() = default;
@@ -95,11 +96,9 @@ bool NotificationWindow::event(QEvent *e)
     if (e->type() == QEvent::PlatformSurface) {
         auto ps = static_cast<QPlatformSurfaceEvent *>(e);
         if (ps->surfaceEventType() == QPlatformSurfaceEvent::SurfaceCreated) {
-            for (QScreen *s : QGuiApplication::screens()) {
-                if (s->name().contains(QStringLiteral("eDP"))) {
-                    setScreen(s);
-                    break;
-                }
+            QScreen *target = ScreenHelper::instance()->primaryScreen();
+            if (target) {
+                setScreen(target);
             }
             PlasmaShellWaylandIntegration::get(this)->setPosition(QPoint(x(), y()));
         }

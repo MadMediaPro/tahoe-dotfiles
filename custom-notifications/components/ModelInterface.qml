@@ -22,6 +22,7 @@ QtObject {
 
     property bool inGroup: false
     property bool inHistory: false
+    property bool cardHovered: false
 
     property var applicationIconSource
     property string applicationName
