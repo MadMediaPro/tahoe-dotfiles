@@ -34,13 +34,182 @@ CORNER_PATH = re.compile(
     r'h (?P<w>\d+(?:\.\d+)?) z"'
 )
 
+DARK_DIALOG_SHADOW = re.compile(
+    r'd="m (?P<x>-?\d+(?:\.\d+)?),(?P<y>-?\d+(?:\.\d+)?) '
+    r"v 24 h 12 v -(?P<top>\d+(?:\.\d+)?) "
+    r"c 0,-(?P<c1>\d+(?:\.\d+)?) (?P<c2>\d+(?:\.\d+)?),-(?P<r>\d+(?:\.\d+)?) "
+    r"(?P<r2>\d+(?:\.\d+)?),-(?P<r3>\d+(?:\.\d+)?) "
+    r'h (?P<top2>\d+(?:\.\d+)?) v -12 z"'
+)
+DARK_DIALOG_SHADOW_BORDER_OLD = re.compile(
+    r'(?P<style>style="opacity:0\.8;fill:#000000")(?P<gap>\s*)'
+    r'd="m -5\.584012,937\.86215 c -6\.347891,0 -11\.458008,5\.11013 '
+    r'-11\.458008,11\.45801 v 1\.04199 h 0\.5 v -1 '
+    r'c 0,-6\.09397 4\.906024,-11 11,-11 h 1 v -0\.5 z"'
+)
+DARK_DIALOG_SHADOW_BORDER_CURVE = re.compile(
+    r'd="m (?P<x>-?\d+(?:\.\d+)?),(?P<y>-?\d+(?:\.\d+)?) '
+    r"c 0,-(?P<c1>\d+(?:\.\d+)?) (?P<c2>\d+(?:\.\d+)?),-(?P<r>\d+(?:\.\d+)?) "
+    r"(?P<r2>\d+(?:\.\d+)?),-(?P<r3>\d+(?:\.\d+)?) "
+    r'h (?P<w>\d+(?:\.\d+)?)"'
+)
+DARK_DIALOG_FILL = re.compile(
+    r'd="m (?P<x>-?\d+(?:\.\d+)?),(?P<y>-?\d+(?:\.\d+)?) '
+    r"c -(?P<c1>\d+(?:\.\d+)?),0 -(?P<r>\d+(?:\.\d+)?),(?P<c2>\d+(?:\.\d+)?) "
+    r"-(?P<r2>\d+(?:\.\d+)?),(?P<r3>\d+(?:\.\d+)?) "
+    r'v (?P<bottom>\d+(?:\.\d+)?) h (?P<w>\d+(?:\.\d+)?) v -12 z"'
+)
+DARK_DIALOG_BORDER = re.compile(
+    r'd="m (?P<x>-?\d+(?:\.\d+)?),(?P<y>-?\d+(?:\.\d+)?) '
+    r"c -(?P<c1>\d+(?:\.\d+)?),0 -(?P<r>\d+(?:\.\d+)?),(?P<c2>\d+(?:\.\d+)?) "
+    r"-(?P<r2>\d+(?:\.\d+)?),(?P<r3>\d+(?:\.\d+)?) "
+    r"v (?P<bottom>\d+(?:\.\d+)?) h 0\.5 v -(?P<v2>\d+(?:\.\d+)?) "
+    r"c 0,-(?P<ic1>\d+(?:\.\d+)?) (?P<ic2>\d+(?:\.\d+)?),-(?P<ir>\d+(?:\.\d+)?) "
+    r"(?P<ir2>\d+(?:\.\d+)?),-(?P<ir3>\d+(?:\.\d+)?) "
+    r'H (?P<x2>-?\d+(?:\.\d+)?) v -0\.5 z"'
+)
+DARK_DIALOG_MASK = re.compile(
+    r'd="m (?P<x>-?\d+(?:\.\d+)?),(?P<y>-?\d+(?:\.\d+)?) '
+    r"c -(?P<c1>\d+(?:\.\d+)?),0 -(?P<r>\d+(?:\.\d+)?),(?P<c2>\d+(?:\.\d+)?) "
+    r"-(?P<r2>\d+(?:\.\d+)?),(?P<r3>\d+(?:\.\d+)?) "
+    r'h (?P<w>\d+(?:\.\d+)?) z"'
+)
+DARK_PANEL_OUTER = re.compile(
+    r'd="m (?P<x>-?\d+(?:\.\d+)?),(?P<y>-?\d+(?:\.\d+)?) '
+    r"c -(?P<c1>\d+(?:\.\d+)?),0 -(?P<r>\d+(?:\.\d+)?),(?P<c2>\d+(?:\.\d+)?) "
+    r"-(?P<r2>\d+(?:\.\d+)?),(?P<r3>\d+(?:\.\d+)?) "
+    r'h (?P<w>\d+(?:\.\d+)?) z"'
+)
+DARK_PANEL_BORDER = re.compile(
+    r'd="m (?P<x>-?\d+(?:\.\d+)?),(?P<y>-?\d+(?:\.\d+)?) '
+    r"c -(?P<c1>\d+(?:\.\d+)?),0 -(?P<r>\d+(?:\.\d+)?),(?P<c2>\d+(?:\.\d+)?) "
+    r"-(?P<r2>\d+(?:\.\d+)?),(?P<r3>\d+(?:\.\d+)?) "
+    r"h (?P<t>\d+(?:\.\d+)?) "
+    r"c 0,-(?P<ic1>\d+(?:\.\d+)?) (?P<ic2>\d+(?:\.\d+)?),-(?P<ir>\d+(?:\.\d+)?) "
+    r'(?P<ir2>\d+(?:\.\d+)?),-(?P<ir3>\d+(?:\.\d+)?) z"'
+)
+DARK_PANEL_MASK = re.compile(
+    r'd="m (?P<x>-?\d+(?:\.\d+)?),(?P<y>-?\d+(?:\.\d+)?) '
+    r"c -(?P<c1>\d+(?:\.\d+)?),0 -(?P<r>\d+(?:\.\d+)?),(?P<c2>\d+(?:\.\d+)?) "
+    r"-(?P<r2>\d+(?:\.\d+)?),(?P<r3>\d+(?:\.\d+)?) "
+    r'[Hh] (?P<x2>-?\d+(?:\.\d+)?) [Zz]"'
+)
+
 KCFG_ARC = 0.5522847498
+PANEL_ARC = 0.554
 
 
 def number(value: float, like: str) -> str:
     if "." not in like and "e" not in like.lower():
         return str(int(round(value)))
     return f"{value:.6f}".rstrip("0").rstrip(".")
+
+
+def _fmt(value: float) -> str:
+    return number(value, "0.0")
+
+
+def _arc_controls(radius: float, arc: float = KCFG_ARC) -> tuple[float, float]:
+    first = radius * arc
+    return first, radius - first
+
+
+def _dialog_shadow_fill(x: float, y: float, radius: float) -> str:
+    top = 12.0 - radius
+    c1, c2 = _arc_controls(radius)
+    return (
+        f'd="m {_fmt(x)},{_fmt(y)} v 24 h 12 v -{_fmt(top)} '
+        f'c 0,-{_fmt(c1)} {_fmt(c2)},-{_fmt(radius)} {_fmt(radius)},-{_fmt(radius)} '
+        f'h {_fmt(top)} v -12 z"'
+    )
+
+
+def _dialog_shadow_border(x: float, y_base: float, radius: float) -> str:
+    top = 12.0 - radius
+    c1, c2 = _arc_controls(radius)
+    y = y_base + radius
+    return (
+        f'd="m {_fmt(x)},{_fmt(y)} c 0,-{_fmt(c1)} {_fmt(c2)},-{_fmt(radius)} '
+        f'{_fmt(radius)},-{_fmt(radius)} h {_fmt(top)}"'
+    )
+
+
+def _dialog_fill(x_right: float, y: float, radius: float) -> str:
+    top = 12.0 - radius
+    c1, c2 = _arc_controls(radius)
+    return (
+        f'd="m {_fmt(x_right)},{_fmt(y)} h -{_fmt(radius)} '
+        f'c -{_fmt(c1)},0 -{_fmt(radius)},{_fmt(c2)} -{_fmt(radius)},{_fmt(radius)} '
+        f'v {_fmt(top)} h 12 z"'
+    )
+
+
+def _dialog_border(x_right: float, y: float, radius: float) -> str:
+    top = 12.0 - radius
+    c1, c2 = _arc_controls(radius)
+    inner = radius - 0.5
+    ic1, ic2 = _arc_controls(inner)
+    return (
+        f'd="m {_fmt(x_right)},{_fmt(y)} h -{_fmt(radius)} '
+        f'c -{_fmt(c1)},0 -{_fmt(radius)},{_fmt(c2)} -{_fmt(radius)},{_fmt(radius)} '
+        f'v {_fmt(top)} h 0.5 v -{_fmt(top)} '
+        f'c 0,-{_fmt(ic1)} {_fmt(ic2)},-{_fmt(inner)} {_fmt(inner)},-{_fmt(inner)} '
+        f'h {_fmt(radius)} v -0.5 z"'
+    )
+
+
+def _dialog_mask(x_right: float, y: float, radius: float) -> str:
+    top = 12.0 - radius
+    c1, c2 = _arc_controls(radius)
+    return (
+        f'd="m {_fmt(x_right)},{_fmt(y)} h -{_fmt(radius)} '
+        f'c -{_fmt(c1)},0 -{_fmt(radius)},{_fmt(c2)} -{_fmt(radius)},{_fmt(radius)} '
+        f'v {_fmt(top)} h 12 z"'
+    )
+
+
+def _dialog_mask_top(x_right: float, y: float, radius: float) -> str:
+    c1, c2 = _arc_controls(radius)
+    return (
+        f'd="m {_fmt(x_right)},{_fmt(y)} h -{_fmt(radius)} '
+        f'c -{_fmt(c1)},0 -{_fmt(radius)},{_fmt(c2)} -{_fmt(radius)},{_fmt(radius)} '
+        f'h 12 z"'
+    )
+
+
+def _panel_outer(x_right: float, y: float, radius: float) -> str:
+    straight = 16.0 - radius
+    c1, c2 = _arc_controls(radius, PANEL_ARC)
+    return (
+        f'd="m {_fmt(x_right)},{_fmt(y)} h -{_fmt(straight)} '
+        f'c -{_fmt(c1)},0 -{_fmt(radius)},{_fmt(c2)} -{_fmt(radius)},{_fmt(radius)} '
+        f'v {_fmt(straight)} h 16 z"'
+    )
+
+
+def _panel_border(x_right: float, y: float, radius: float) -> str:
+    straight = 16.0 - radius
+    c1, c2 = _arc_controls(radius, PANEL_ARC)
+    inner = radius - 0.8
+    ic1, ic2 = _arc_controls(inner, PANEL_ARC)
+    return (
+        f'd="m {_fmt(x_right)},{_fmt(y)} h -{_fmt(straight)} '
+        f'c -{_fmt(c1)},0 -{_fmt(radius)},{_fmt(c2)} -{_fmt(radius)},{_fmt(radius)} '
+        f'v {_fmt(straight)} h 0.8 v -{_fmt(straight)} '
+        f'c 0,-{_fmt(ic1)} {_fmt(ic2)},-{_fmt(inner)} {_fmt(inner)},-{_fmt(inner)} '
+        f'h {_fmt(straight)} v -0.8 z"'
+    )
+
+
+def _panel_mask(x_right: float, y: float, radius: float) -> str:
+    inner = radius - 0.8
+    straight = 16.0 - radius
+    c1, c2 = _arc_controls(inner, PANEL_ARC)
+    return (
+        f'd="m {_fmt(x_right)},{_fmt(y)} h -{_fmt(straight)} '
+        f'c -{_fmt(c1)},0 -{_fmt(inner)},{_fmt(c2)} -{_fmt(inner)},{_fmt(inner)} '
+        f'v {_fmt(straight)} H {_fmt(x_right)} Z"'
+    )
 
 
 def parse_ini(path: Path) -> dict[tuple[str, str], str]:
@@ -187,6 +356,134 @@ def patch_svgz(
         return []
     text = gzip.decompress(path.read_bytes()).decode("utf-8")
     changes: list[str] = []
+    target_radius = target / scale
+
+    def replace_dialog_shadow(match: re.Match[str]) -> str:
+        groups = match.groupdict()
+        radius = float(groups["r"])
+        if abs(float(groups["r2"]) - radius) > 0.01 or abs(float(groups["r3"]) - radius) > 0.01:
+            return match.group(0)
+        if abs(float(groups["top"]) - (12 - radius)) > 0.01:
+            return match.group(0)
+        if abs(float(groups["top2"]) - (12 - radius)) > 0.01:
+            return match.group(0)
+        if abs(target_radius - radius) < 0.001:
+            return match.group(0)
+        changes.append(f"shadow radius {number(radius, groups['r'])} -> {number(target_radius, groups['r'])}")
+        return _dialog_shadow_fill(float(groups["x"]), float(groups["y"]), target_radius)
+
+    def replace_dialog_shadow_border_old(match: re.Match[str]) -> str:
+        changes.append("shadow border fill -> stroke")
+        return (
+            'style="opacity:0.8;fill:none;stroke:#000000;stroke-width:0.5"'
+            f'{match.group("gap")}'
+            f'{_dialog_shadow_border(-16.54202, 938.36215, target_radius)}'
+        )
+
+    def replace_dialog_shadow_border_curve(match: re.Match[str]) -> str:
+        groups = match.groupdict()
+        radius = float(groups["r"])
+        if abs(float(groups["r2"]) - radius) > 0.01 or abs(float(groups["r3"]) - radius) > 0.01:
+            return match.group(0)
+        if abs(float(groups["w"]) - (12 - radius)) > 0.01:
+            return match.group(0)
+        if abs(target_radius - radius) < 0.001:
+            return match.group(0)
+        changes.append(
+            f"shadow border radius {number(radius, groups['r'])} -> {number(target_radius, groups['r'])}"
+        )
+        return _dialog_shadow_border(float(groups["x"]), float(groups["y"]) - radius, target_radius)
+
+    def replace_dialog_fill(match: re.Match[str]) -> str:
+        groups = match.groupdict()
+        radius = float(groups["r"])
+        bottom = float(groups["bottom"])
+        if abs(float(groups["r2"]) - radius) > 0.01 or abs(float(groups["r3"]) - radius) > 0.01:
+            return match.group(0)
+        if abs(bottom - (12 - radius)) > 0.01 or abs(float(groups["w"]) - 12) > 0.01:
+            return match.group(0)
+        if abs(target_radius - radius) < 0.001:
+            return match.group(0)
+        changes.append(f"corner radius {number(radius, groups['r'])} -> {number(target_radius, groups['r'])}")
+        return _dialog_fill(float(groups["x"]) + bottom, float(groups["y"]), target_radius)
+
+    def replace_dialog_border(match: re.Match[str]) -> str:
+        groups = match.groupdict()
+        radius = float(groups["r"])
+        bottom = float(groups["bottom"])
+        if abs(float(groups["r2"]) - radius) > 0.01 or abs(float(groups["r3"]) - radius) > 0.01:
+            return match.group(0)
+        if abs(bottom - (12 - radius)) > 0.01:
+            return match.group(0)
+        if abs(target_radius - radius) < 0.001:
+            return match.group(0)
+        changes.append(f"corner radius {number(radius, groups['r'])} -> {number(target_radius, groups['r'])}")
+        return _dialog_border(float(groups["x"]) + bottom, float(groups["y"]), target_radius)
+
+    def replace_dialog_mask(match: re.Match[str]) -> str:
+        groups = match.groupdict()
+        radius = float(groups["r"])
+        if abs(float(groups["r2"]) - radius) > 0.01 or abs(float(groups["r3"]) - radius) > 0.01:
+            return match.group(0)
+        if abs(float(groups["w"]) - radius) > 0.01:
+            return match.group(0)
+        if abs(target_radius - radius) < 0.001:
+            return match.group(0)
+        x = float(groups["x"])
+        y = float(groups["y"])
+        changes.append(f"corner radius {number(radius, groups['r'])} -> {number(target_radius, groups['r'])}")
+        if x > 100:
+            return _dialog_mask_top(x, y, target_radius)
+        return _dialog_mask(x, y, target_radius)
+
+    def replace_panel_outer(match: re.Match[str]) -> str:
+        groups = match.groupdict()
+        radius = float(groups["r"])
+        if abs(float(groups["r2"]) - radius) > 0.01 or abs(float(groups["r3"]) - radius) > 0.01:
+            return match.group(0)
+        if abs(float(groups["w"]) - 16) > 0.01:
+            return match.group(0)
+        if abs(target_radius - radius) < 0.001:
+            return match.group(0)
+        changes.append(f"corner radius {number(radius, groups['r'])} -> {number(target_radius, groups['r'])}")
+        return _panel_outer(float(groups["x"]), float(groups["y"]), target_radius)
+
+    def replace_panel_border(match: re.Match[str]) -> str:
+        groups = match.groupdict()
+        radius = float(groups["r"])
+        if abs(float(groups["r2"]) - radius) > 0.01 or abs(float(groups["r3"]) - radius) > 0.01:
+            return match.group(0)
+        if abs(float(groups["ir"]) - (radius - 0.8)) > 0.01:
+            return match.group(0)
+        if abs(target_radius - radius) < 0.001:
+            return match.group(0)
+        changes.append(f"corner radius {number(radius, groups['r'])} -> {number(target_radius, groups['r'])}")
+        return _panel_border(float(groups["x"]), float(groups["y"]), target_radius)
+
+    def replace_panel_mask(match: re.Match[str]) -> str:
+        groups = match.groupdict()
+        radius = float(groups["r"])
+        if abs(float(groups["r2"]) - radius) > 0.01 or abs(float(groups["r3"]) - radius) > 0.01:
+            return match.group(0)
+        if abs(float(groups["x2"]) - float(groups["x"])) > 0.01:
+            return match.group(0)
+        inner = target_radius - 0.8
+        if abs(inner - radius) < 0.001:
+            return match.group(0)
+        changes.append(f"corner radius {number(radius, groups['r'])} -> {number(inner, groups['r'])}")
+        return _panel_mask(float(groups["x"]), float(groups["y"]), target_radius)
+
+    if scale == 2:
+        text = DARK_DIALOG_SHADOW_BORDER_OLD.sub(replace_dialog_shadow_border_old, text)
+        text = DARK_DIALOG_SHADOW_BORDER_CURVE.sub(replace_dialog_shadow_border_curve, text)
+        text = DARK_DIALOG_SHADOW.sub(replace_dialog_shadow, text)
+        text = DARK_DIALOG_FILL.sub(replace_dialog_fill, text)
+        text = DARK_DIALOG_BORDER.sub(replace_dialog_border, text)
+        text = DARK_DIALOG_MASK.sub(replace_dialog_mask, text)
+    else:
+        text = DARK_PANEL_OUTER.sub(replace_panel_outer, text)
+        text = DARK_PANEL_BORDER.sub(replace_panel_border, text)
+        text = DARK_PANEL_MASK.sub(replace_panel_mask, text)
 
     def replace(match: re.Match[str]) -> str:
         groups = match.groupdict()
