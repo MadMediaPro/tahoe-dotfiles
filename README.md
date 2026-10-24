@@ -8,6 +8,10 @@ The layout is organized by domain so that desktop, shell, application, theme, an
 
 ![Floating dock](docs/screenshots/dock.png)
 
+## Wallpaper
+
+For the best glass-panel look, use a Liquid Glass panel wallpaper from [Miłosz Falinski](https://miloszfalinski.com/liquid-glass-panel-wallpapers/).
+
 ## Overview
 
 | Component | Choice |
