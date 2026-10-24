@@ -128,6 +128,7 @@ dotfiles/
 │   ├── convert/                                  # SVG recoloring and frosted-glass engine
 │   ├── tests/test_convert.py                     # Unit tests
 │   ├── frostify.py                               # CLI wrapper around convert
+│   ├── patch.py                                  # KDE and MacTahoe radius patcher
 │   └── tweak-toolbar-border.py                   # Kvantum toolbar border helper
 ├── installer/
 │   ├── install.py                                # Installer and restore script
@@ -350,6 +351,22 @@ The script configures CMake, builds with Ninja, copies the plugin into `~/.local
 ### Kvantum toolbar helper
 
 `tooling/tweak-toolbar-border.py` edits the toolbar button border and background in the Kvantum theme `mac-tahoe-liquid-kdeDark`. The script expects that theme to exist under `~/.config/Kvantum/`. Adjust the color and opacity constants at the top of the file, then run it directly. It is optional and not called by the installer.
+
+### Radius helper
+
+`tooling/patch.py` sets the outer corner radius across KWin, Darkly, Klassy, and the MacTahoe Plasma theme. It also updates the live configuration, the repository copy, and the MacTahoe source theme. Dependent values such as the Klassy custom button radius are scaled from the previous outer radius so the proportions stay consistent.
+
+```bash
+python3 tooling/patch.py --rounded 12
+```
+
+Preview changes without writing:
+
+```bash
+python3 tooling/patch.py --rounded 12 --dry-run --verbose
+```
+
+Each modified file is backed up under `~/.cache/radius-patch/backups/<timestamp>/`. The script is optional and is not called by the installer.
 
 ## Icon Tooling
 
