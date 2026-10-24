@@ -1,0 +1,14 @@
+[Desktop Entry]
+DefaultProfile=zsh-starship.profile
+
+[General]
+ConfigVersion=1
+
+[Notification Messages]
+CloseAllEmptyTabs=true
+CloseAllTabs=true
+CloseSingleTab=true
+
+[TabBar]
+ExpandTabWidth=true
+SearchTabsButton=0

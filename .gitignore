@@ -16,6 +16,6 @@ __pycache__/
 Thumbs.db
 
 # Custom build artifacts
-custom-notifications/build/
-custom-notifications/.rcc/
-custom-notifications/.qt/
+desktop/notifications/build/
+desktop/notifications/.rcc/
+desktop/notifications/.qt/

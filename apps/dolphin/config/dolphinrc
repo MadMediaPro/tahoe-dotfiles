@@ -1,0 +1,49 @@
+[CompactMode]
+IconSize=22
+PreviewSize=22
+
+[ContentDisplay]
+DirectorySizeMode=ContentSize
+
+[ContextMenu]
+ShowCopyMoveMenu=true
+
+[DetailsMode]
+ExpandableFolders=true
+IconSize=22
+PreviewSize=22
+
+[General]
+AutoExpandFolders=true
+FilterBar=true
+OpenNewTabAfterLastTab=true
+RememberOpenedTabs=false
+RenameInline=false
+ShowFullPath=true
+ShowSelectionToggle=false
+Version=202
+ViewPropsTimestamp=2026,1,4,15,44,56.183
+
+[IconsMode]
+IconSize=80
+PreviewSize=80
+
+[InformationPanel]
+previewsShown=false
+showHovered=false
+
+[KFileDialog Settings]
+Places Icons Auto-resize=false
+Places Icons Static Size=22
+
+[MainWindow]
+MenuBar=Disabled
+
+[MainWindow][Toolbar mainToolBar]
+ToolButtonStyle=IconOnly
+
+[PreviewSettings]
+Plugins=audiothumbnail,blenderthumbnail,comicbookthumbnail,cursorthumbnail,djvuthumbnail,ebookthumbnail,exrthumbnail,directorythumbnail,fontthumbnail,imagethumbnail,jpegthumbnail,kraorathumbnail,windowsexethumbnail,windowsimagethumbnail,mobithumbnail,opendocumentthumbnail,gsthumbnail,rawthumbnail,svgthumbnail,ffmpegthumbs
+
+[Toolbar mainToolBar]
+ToolButtonStyle=IconOnly
