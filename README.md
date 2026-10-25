@@ -8,6 +8,41 @@ The layout is organized by domain so that desktop, shell, application, theme, an
 
 ![Floating dock](docs/screenshots/dock.png)
 
+## Icon Themes
+
+The generated icon theme is available in four variants: white solid, dark solid, and two frosted-glass styles. The screenshots below show a few popular application icons and the Icons page in System Settings.
+
+<table>
+<tr>
+<td align="center" width="50%">
+<b>White Solid</b><br>
+<code>MacTahoe</code><br><br>
+<img src="docs/screenshots/icons-white-solid.png" width="420" alt="White solid app icons"><br><br>
+<img src="docs/screenshots/settings-white-solid.png" width="420" alt="White solid icon settings">
+</td>
+<td align="center" width="50%">
+<b>Dark Solid</b><br>
+<code>MacTahoe-dark</code><br><br>
+<img src="docs/screenshots/icons-dark-solid.png" width="420" alt="Dark solid app icons"><br><br>
+<img src="docs/screenshots/settings-dark-solid.png" width="420" alt="Dark solid icon settings">
+</td>
+</tr>
+<tr>
+<td align="center" width="50%">
+<b>Frosted Light</b><br>
+<code>MacTahoe-Frosted-Light</code><br><br>
+<img src="docs/screenshots/icons-frosted-light.png" width="420" alt="Frosted light app icons"><br><br>
+<img src="docs/screenshots/settings-frosted-light.png" width="420" alt="Frosted light icon settings">
+</td>
+<td align="center" width="50%">
+<b>Frosted Dark</b><br>
+<code>MacTahoe-Frosted-Dark</code><br><br>
+<img src="docs/screenshots/icons-frosted-dark.png" width="420" alt="Frosted dark app icons"><br><br>
+<img src="docs/screenshots/settings-frosted-dark.png" width="420" alt="Frosted dark icon settings">
+</td>
+</tr>
+</table>
+
 ## Wallpaper
 
 For the best glass-panel look, use a Liquid Glass panel wallpaper from [Miłosz Falinski](https://miloszfalinski.com/liquid-glass-panel-wallpapers/).

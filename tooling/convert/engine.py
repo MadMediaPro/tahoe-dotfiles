@@ -9,7 +9,7 @@ from .color import (
     hex_to_rgb,
     recolor_svg,
 )
-from .constants import SEMANTIC_ICON_COLORS
+from .constants import FROSTED_GLYPH_TONE_FLOOR, SEMANTIC_ICON_COLORS
 from .defs import (
     apply_glyph_gradients,
     build_dark_glyph_gradient,
@@ -27,6 +27,45 @@ from .tile import (
     sub_outside_defs,
     tile_scale_for,
 )
+
+# Glyphs darker than this are not considered vivid on the dark solid tile and
+# would disappear against the near-black background.
+DARK_MODE_FOREGROUND_MIN_LIGHTNESS = 0.30
+DARK_GLYPH_MAX_LUMINANCE = 0.25
+
+_LIGHT_FILL = re.compile(
+    r'\bfill="(?:#fff|#ffffff|#fffff9|#fcfcfc|#f5f5f5|#f0f0f0|#dedede|#eee|#d0d0d0|#bebebe)"',
+    re.I,
+)
+_LIGHT_FILL_CSS = re.compile(
+    r"fill:(?:#fff|#ffffff|#fffff9|#fcfcfc|#f5f5f5|#f0f0f0|#dedede|#eee|#d0d0d0|#bebebe)",
+    re.I,
+)
+_LIGHT_STROKE = re.compile(r'\bstroke="(?:#fff|#ffffff|#dedede)"', re.I)
+_HEX_FILL_STROKE = re.compile(r'\b(fill|stroke)="(#[0-9a-fA-F]{3,6})"')
+
+
+def _recolor_glyph_tag(tag: str, glyph_grad_id: str) -> str:
+    """Map light and near-black glyph colors to the dark-mode glyph gradient."""
+    if tag.startswith("<defs") or tag.startswith("</defs"):
+        return tag
+    tag = _LIGHT_FILL.sub(f'fill="url(#{glyph_grad_id})"', tag)
+    tag = _LIGHT_FILL_CSS.sub(f"fill:url(#{glyph_grad_id})", tag)
+    if f"url(#{glyph_grad_id})" in tag and 'fill="#363636"' in tag:
+        tag = tag.replace('fill="#363636"', "")
+    tag = _LIGHT_STROKE.sub(f'stroke="url(#{glyph_grad_id})"', tag)
+
+    def dark_repl(match: re.Match) -> str:
+        rgb = hex_to_rgb(match.group(2))
+        if rgb is None:
+            return match.group(0)
+        r, g, b = (value / 255.0 for value in rgb)
+        luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
+        if luminance >= DARK_GLYPH_MAX_LUMINANCE:
+            return match.group(0)
+        return f'{match.group(1)}="url(#{glyph_grad_id})"'
+
+    return _HEX_FILL_STROKE.sub(dark_repl, tag)
 
 
 class FrostEngine:
@@ -123,7 +162,7 @@ class FrostEngine:
 
         dark_glyph_gradient = None
         if self.mode in ("clear", "frosted-dark", "dark-frosted"):
-            text = apply_glyph_gradients(recolor_svg(text), prefix)
+            text = apply_glyph_gradients(recolor_svg(text, floor=FROSTED_GLYPH_TONE_FLOOR), prefix)
             text = ensure_fill(text, prefix)
         elif self.mode == "dark":
             target_colors = None
@@ -132,33 +171,14 @@ class FrostEngine:
                     if pattern.search(icon_name):
                         target_colors = cols
                         break
-            if target_colors and not foreground_has_vivid_colors(text, ""):
+            if target_colors and not foreground_has_vivid_colors(
+                text, "", min_lightness=DARK_MODE_FOREGROUND_MIN_LIGHTNESS
+            ):
                 glyph_grad_id = f"{prefix}-glyph"
                 dark_glyph_gradient = build_dark_glyph_gradient(prefix, target_colors[0], target_colors[1])
 
                 def recolor_fallback_glyph(match: re.Match) -> str:
-                    tag = match.group(0)
-                    tag = re.sub(
-                        r'\bfill="(?:#fff|#ffffff|#fffff9|#fcfcfc|#f5f5f5|#f0f0f0|#dedede|#eee|#d0d0d0|#bebebe)"',
-                        f'fill="url(#{glyph_grad_id})"',
-                        tag,
-                        flags=re.I,
-                    )
-                    tag = re.sub(
-                        r'fill:(?:#fff|#ffffff|#fffff9|#fcfcfc|#f5f5f5|#f0f0f0|#dedede|#eee|#d0d0d0|#bebebe)',
-                        f'fill:url(#{glyph_grad_id})',
-                        tag,
-                        flags=re.I,
-                    )
-                    if f'url(#{glyph_grad_id})' in tag and 'fill="#363636"' in tag:
-                        tag = tag.replace('fill="#363636"', '')
-                    tag = re.sub(
-                        r'\bstroke="(?:#fff|#ffffff|#dedede)"',
-                        f'stroke="url(#{glyph_grad_id})"',
-                        tag,
-                        flags=re.I,
-                    )
-                    return tag
+                    return _recolor_glyph_tag(match.group(0), glyph_grad_id)
 
                 text = sub_outside_defs(r"<[^>]+>", recolor_fallback_glyph, text)
 
@@ -277,38 +297,17 @@ class FrostEngine:
         dark_glyph_gradient = None
         if self.mode in ("clear", "frosted-dark", "dark-frosted"):
             text = strip_dark_backgrounds(text, tile, tile_scale_for(tile, viewbox_width))
-            text = apply_glyph_gradients(recolor_svg(text), prefix)
+            text = apply_glyph_gradients(recolor_svg(text, floor=FROSTED_GLYPH_TONE_FLOOR), prefix)
             text = ensure_fill(text, prefix)
         elif self.mode == "dark":
-            if target_colors and not foreground_has_vivid_colors(text, new_tile):
+            if target_colors and not foreground_has_vivid_colors(
+                text, new_tile, min_lightness=DARK_MODE_FOREGROUND_MIN_LIGHTNESS
+            ):
                 glyph_grad_id = f"{prefix}-glyph"
                 dark_glyph_gradient = build_dark_glyph_gradient(prefix, target_colors[0], target_colors[1])
 
                 def recolor_glyph(match: re.Match) -> str:
-                    tag = match.group(0)
-                    if tag.startswith("<defs") or tag.startswith("</defs"):
-                        return tag
-                    tag = re.sub(
-                        r'\bfill="(?:#fff|#ffffff|#fffff9|#fcfcfc|#f5f5f5|#f0f0f0|#dedede|#eee|#d0d0d0|#bebebe)"',
-                        f'fill="url(#{glyph_grad_id})"',
-                        tag,
-                        flags=re.I,
-                    )
-                    tag = re.sub(
-                        r'fill:(?:#fff|#ffffff|#fffff9|#fcfcfc|#f5f5f5|#f0f0f0|#dedede|#eee|#d0d0d0|#bebebe)',
-                        f'fill:url(#{glyph_grad_id})',
-                        tag,
-                        flags=re.I,
-                    )
-                    if f'url(#{glyph_grad_id})' in tag and 'fill="#363636"' in tag:
-                        tag = tag.replace('fill="#363636"', '')
-                    tag = re.sub(
-                        r'\bstroke="(?:#fff|#ffffff|#dedede)"',
-                        f'stroke="url(#{glyph_grad_id})"',
-                        tag,
-                        flags=re.I,
-                    )
-                    return tag
+                    return _recolor_glyph_tag(match.group(0), glyph_grad_id)
 
                 text = sub_outside_defs(r"<[^>]+>", recolor_glyph, text)
 

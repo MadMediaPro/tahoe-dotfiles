@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Callable, Optional, Union
 from .battery import is_battery_charging_icon, transform_battery_svg
 from .engine import FrostEngine
+from .folder import is_folder_icon, transform_folder_svg
 from .overrides import IconOverrides
 
 
@@ -143,11 +144,19 @@ class ThemeGenerator:
                             and "scalable" in rel_parts
                             and "symbolic" not in source.name.lower()
                         )
-                        converted = self.engine.transform(
-                            text,
-                            fallback=is_app_scalable,
-                            icon_name=source.stem,
+                        is_places_scalable = (
+                            context == "places"
+                            and "scalable" in rel_parts
+                            and is_folder_icon(source.name)
                         )
+                        if is_places_scalable:
+                            converted = transform_folder_svg(text, mode=self.mode)
+                        else:
+                            converted = self.engine.transform(
+                                text,
+                                fallback=is_app_scalable,
+                                icon_name=source.stem,
+                            )
                     except Exception:
                         converted = None
                         stats.failed += 1

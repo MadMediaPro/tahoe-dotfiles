@@ -5,6 +5,12 @@ import re
 # Tonal shades for rendering glyph gradients in clear mode
 GLYPH_TONES = (255, 244, 232, 218, 205, 194)
 
+# Multiplier for glyph gradient highlight/shadow depth
+GLYPH_GRADIENT_STRENGTH = 2.5
+
+# Darkest pearl tone used for inner glyphs in frosted modes (wider contrast)
+FROSTED_GLYPH_TONE_FLOOR = 140
+
 # SVG Standard Named Colors mapped to sRGB tuples
 NAMED_COLORS = {
     "black": (0, 0, 0),
@@ -78,10 +84,14 @@ FROST_DEFS_LIGHT = """<linearGradient id="{p}-bg" x1="0" y1="0" x2="0" y2="1">
 <stop offset=".45" stop-color="#ffffff" stop-opacity=".18"/>
 <stop offset="1" stop-color="#ffffff" stop-opacity=".04"/>
 </linearGradient>
-<linearGradient id="{p}-sheen" x1="0" y1="0" x2="1" y2="1">
+<radialGradient id="{p}-sheen" cx="0" cy="0" r="1" gradientUnits="objectBoundingBox">
 <stop offset="0" stop-color="#ffffff" stop-opacity=".20"/>
+<stop offset=".20" stop-color="#ffffff" stop-opacity=".14"/>
+<stop offset=".40" stop-color="#ffffff" stop-opacity=".085"/>
+<stop offset=".60" stop-color="#ffffff" stop-opacity=".04"/>
+<stop offset=".80" stop-color="#ffffff" stop-opacity=".012"/>
 <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-</linearGradient>
+</radialGradient>
 <linearGradient id="{p}-shade" x1="0" y1="0" x2="0" y2="1">
 <stop offset=".55" stop-color="#000000" stop-opacity="0"/>
 <stop offset="1" stop-color="#000000" stop-opacity=".10"/>
@@ -105,10 +115,14 @@ FROST_DEFS_DARK = """<linearGradient id="{p}-bg" x1="0" y1="0" x2="0" y2="1">
 <stop offset=".50" stop-color="#ffffff" stop-opacity=".06"/>
 <stop offset="1" stop-color="#ffffff" stop-opacity=".01"/>
 </linearGradient>
-<linearGradient id="{p}-sheen" x1="0" y1="0" x2="1" y2="1">
+<radialGradient id="{p}-sheen" cx="0" cy="0" r="1" gradientUnits="objectBoundingBox">
 <stop offset="0" stop-color="#ffffff" stop-opacity=".08"/>
+<stop offset=".20" stop-color="#ffffff" stop-opacity=".055"/>
+<stop offset=".40" stop-color="#ffffff" stop-opacity=".034"/>
+<stop offset=".60" stop-color="#ffffff" stop-opacity=".016"/>
+<stop offset=".80" stop-color="#ffffff" stop-opacity=".005"/>
 <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-</linearGradient>
+</radialGradient>
 <linearGradient id="{p}-shade" x1="0" y1="0" x2="0" y2="1">
 <stop offset=".55" stop-color="#000000" stop-opacity="0"/>
 <stop offset="1" stop-color="#000000" stop-opacity=".20"/>
@@ -129,10 +143,14 @@ FROST_DEFS_FROSTED_DARK = """<linearGradient id="{p}-bg" x1="0" y1="0" x2="0" y2
 <stop offset=".45" stop-color="#ffffff" stop-opacity=".18"/>
 <stop offset="1" stop-color="#ffffff" stop-opacity=".04"/>
 </linearGradient>
-<linearGradient id="{p}-sheen" x1="0" y1="0" x2="1" y2="1">
+<radialGradient id="{p}-sheen" cx="0" cy="0" r="1" gradientUnits="objectBoundingBox">
 <stop offset="0" stop-color="#ffffff" stop-opacity=".20"/>
+<stop offset=".20" stop-color="#ffffff" stop-opacity=".14"/>
+<stop offset=".40" stop-color="#ffffff" stop-opacity=".085"/>
+<stop offset=".60" stop-color="#ffffff" stop-opacity=".04"/>
+<stop offset=".80" stop-color="#ffffff" stop-opacity=".012"/>
 <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-</linearGradient>
+</radialGradient>
 <linearGradient id="{p}-shade" x1="0" y1="0" x2="0" y2="1">
 <stop offset=".55" stop-color="#000000" stop-opacity="0"/>
 <stop offset="1" stop-color="#000000" stop-opacity=".10"/>

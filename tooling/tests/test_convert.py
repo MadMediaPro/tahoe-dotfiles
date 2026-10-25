@@ -1,6 +1,7 @@
 """Unit tests for the convert package."""
 
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -10,8 +11,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from convert.battery import is_battery_charging_icon, transform_battery_svg
-from convert.color import hex_to_rgb, lighten_color, recolor_svg
+from convert.color import ensure_luminance, hex_to_rgb, lighten_color, recolor_svg
 from convert.engine import FrostEngine, frost_svg
+from convert.folder import is_folder_icon, transform_folder_svg
 from convert.geometry import compute_iou, element_bbox, path_bbox
 from convert.overrides import IconOverrides
 from convert.theme import ThemeGenerator, generate_theme
@@ -34,6 +36,24 @@ class TestColorModule(unittest.TestCase):
         sample = '<svg><path fill="#ff0000" stroke="#0000ff"/></svg>'
         recolored = recolor_svg(sample)
         self.assertNotIn("#ff0000", recolored)
+
+    def test_recolor_svg_contrast_floor_darkens_midtones(self):
+        sample = '<svg><path fill="#ff0000"/></svg>'
+        default = re.search(r'#([0-9a-fA-F]{6})', recolor_svg(sample)).group(1)
+        boosted = re.search(r'#([0-9a-fA-F]{6})', recolor_svg(sample, floor=140)).group(1)
+        self.assertLess(int(boosted[:2], 16), int(default[:2], 16))
+
+    def test_ensure_luminance(self):
+        # Bright colors are left untouched
+        self.assertEqual(ensure_luminance("#00e676"), "#00e676")
+        # Dark colors are lifted while keeping the hue
+        lifted = ensure_luminance("#101648")
+        self.assertNotEqual(lifted, "#101648")
+        rgb = hex_to_rgb(lifted)
+        self.assertIsNotNone(rgb)
+        r, g, b = (value / 255.0 for value in rgb)
+        self.assertGreaterEqual(0.2126 * r + 0.7152 * g + 0.0722 * b, 0.35)
+        self.assertGreater(b, r)  # still blue
 
 
 class TestGeometryModule(unittest.TestCase):
@@ -132,6 +152,40 @@ class TestEngineModule(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertIn("mtf-bg", result)
         self.assertIn("mtf-rim", result)
+
+    def test_frosted_sheen_is_smooth_radial_gradient(self):
+        svg = (
+            '<svg viewBox="0 0 64 64">'
+            '<rect width="56" height="56" rx="13" fill="#123456"/>'
+            '<circle cx="32" cy="32" r="10" fill="#ffffff"/>'
+            '</svg>'
+        )
+        result = FrostEngine(mode="clear").transform(svg)
+        self.assertIsNotNone(result)
+        self.assertIn('<radialGradient id="mtf-sheen"', result)
+        sheen = re.search(r'<radialGradient id="mtf-sheen".*?</radialGradient>', result, re.S)
+        self.assertIsNotNone(sheen)
+        opacities = re.findall(r'stop-opacity="([\d.]+)"', sheen.group(0))
+        self.assertGreaterEqual(len(opacities), 4)
+        self.assertEqual(opacities[0], ".20")
+        self.assertEqual(opacities[-1], "0")
+
+    def test_frosted_glyph_has_shaded_bottom(self):
+        svg = (
+            '<svg viewBox="0 0 64 64">'
+            '<rect width="56" height="56" rx="13" fill="#123456"/>'
+            '<circle cx="32" cy="32" r="10" fill="#ffffff"/>'
+            '</svg>'
+        )
+        result = FrostEngine(mode="clear").transform(svg)
+        self.assertIsNotNone(result)
+        gradient = re.search(r'<linearGradient id="mtf-g0".*?</linearGradient>', result, re.S)
+        self.assertIsNotNone(gradient)
+        stops = re.findall(r'stop-color="#([0-9a-fA-F]{6})"', gradient.group(0))
+        self.assertEqual(len(stops), 4)
+        top = int(stops[0][:2], 16)
+        bottom = int(stops[-1][:2], 16)
+        self.assertGreaterEqual(top - bottom, 100)
 
     def test_transform_32px_preferences_icon(self):
         # 32x32 SVG without viewBox (common in preferences and categories)
@@ -286,6 +340,60 @@ class TestEngineModule(unittest.TestCase):
         self.assertNotIn('stop-opacity=".', bg_grad)
         self.assertIn("#242428", bg_grad)
 
+    def test_dark_mode_dark_glyph_uses_tile_gradient(self):
+        # Spotify-style icon: vivid green tile with a near-black glyph. The dark
+        # glyph must not be treated as vivid, otherwise it vanishes on the dark
+        # solid background instead of receiving the green glyph gradient.
+        svg = (
+            '<svg viewBox="0 0 64 64">'
+            '<defs>'
+            '<linearGradient id="a">'
+            '<stop offset="0" stop-color="#00c853"/>'
+            '<stop offset="1" stop-color="#00e676"/>'
+            '</linearGradient>'
+            '</defs>'
+            '<rect width="55.999" height="55.999" x="4" y="4" rx="13.001" ry="13.001" fill="url(#a)"/>'
+            '<path fill="#263238" d="M20 24c8-4 18-4 26 0"/>'
+            '</svg>'
+        )
+        engine = FrostEngine(mode="dark")
+        result = engine.transform(svg, fallback=False, icon_name="spotify-client")
+        self.assertIsNotNone(result)
+        self.assertIn("mtf-glyph", result)
+        self.assertIn('fill="url(#mtf-glyph)"', result)
+        self.assertIn("#00c853", result)
+        self.assertIn("#00e676", result)
+        self.assertNotIn('fill="#263238"', result)
+
+    def test_dark_mode_lifts_dark_tile_accent_for_glyph(self):
+        # Termius-style icon: the tile accent itself is a very dark navy, so the
+        # glyph gradient must be lifted to stay legible on the solid dark tile.
+        svg = (
+            '<svg viewBox="0 0 64 64">'
+            '<defs>'
+            '<linearGradient id="a">'
+            '<stop offset="0" stop-color="#030312"/>'
+            '<stop offset="1" stop-color="#101648"/>'
+            '</linearGradient>'
+            '</defs>'
+            '<rect width="56.002" height="56.002" x="4" y="3.969" rx="13.002" ry="13.002" fill="url(#a)"/>'
+            '<path fill="#fff" d="M20 24c8-4 18-4 26 0"/>'
+            '</svg>'
+        )
+        engine = FrostEngine(mode="dark")
+        result = engine.transform(svg, fallback=False, icon_name="termius")
+        self.assertIsNotNone(result)
+        self.assertIn("mtf-glyph", result)
+        gradient = re.search(r'<linearGradient id="mtf-glyph".*?</linearGradient>', result, re.S)
+        self.assertIsNotNone(gradient)
+        stops = re.findall(r'stop-color="(#[0-9a-fA-F]{3,6})"', gradient.group(0))
+        self.assertEqual(len(stops), 2)
+        for stop in stops:
+            rgb = hex_to_rgb(stop)
+            self.assertIsNotNone(rgb)
+            r, g, b = (value / 255.0 for value in rgb)
+            self.assertGreaterEqual(0.2126 * r + 0.7152 * g + 0.0722 * b, 0.35)
+
     def test_dark_mode_preserves_multicolor_glyph(self):
         # App icon with tile and multi-colored glyph (e.g. Chrome, Firefox)
         svg = (
@@ -316,6 +424,107 @@ class TestEngineModule(unittest.TestCase):
         self.assertIn("#fff", override_frosted)  # Pearl/white right face
 
 
+FOLDER_SVG = (
+    '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 16.933 16.933">'
+    "<defs>"
+    '<linearGradient id="a"><stop offset="0" stop-color="#7cc1ea"/>'
+    '<stop offset="1" stop-color="#56a1d3"/></linearGradient>'
+    '<linearGradient id="c"><stop offset="0" stop-color="#88ccf2"/>'
+    '<stop offset="1" stop-color="#67b1de"/></linearGradient>'
+    "</defs>"
+    '<path fill="url(#a)" d="M1.945 2.381H15.875V14.552H1.944Z"/>'
+    '<rect width="14.287" height="10.054" x="1.323" y="3.969" fill="#fff" rx=".529" ry=".529"/>'
+    '<rect width="15.346" height="10.054" x=".794" y="4.498" fill="url(#c)" rx="1.058" ry="1.058"/>'
+    '<path fill="#fff" d="M1.852 4.498c-.586 0-1.058.472-1.058 1.058v.265c0-.587.472-1.059 '
+    '1.058-1.059h13.229c.586 0 1.058.472 1.058 1.059v-.265c0-.586-.472-1.058-1.058-1.058z" opacity=".15"/>'
+    "</svg>"
+)
+
+
+class TestFolderModule(unittest.TestCase):
+    def test_is_folder_icon(self):
+        self.assertTrue(is_folder_icon("folder-code.svg"))
+        self.assertTrue(is_folder_icon("blue-folder.svg"))
+        self.assertTrue(is_folder_icon("user-home.svg"))
+        self.assertTrue(is_folder_icon("user-desktop.svg"))
+        self.assertFalse(is_folder_icon("file-manager.svg"))
+        self.assertFalse(is_folder_icon("network.svg"))
+
+    def test_dark_folder_uses_sky_gradient(self):
+        result = transform_folder_svg(FOLDER_SVG, mode="dark")
+        self.assertIsNotNone(result)
+        self.assertIn('fill="url(#mtf-folder-bg)"', result)
+        self.assertIn("#0ea5e9", result)  # Tailwind sky-500
+        self.assertIn("#0284c7", result)  # Tailwind sky-600 at the bottom
+        self.assertNotIn("#242428", result)
+        self.assertNotIn('fill="url(#a)"', result)
+        self.assertNotIn('fill="url(#c)"', result)
+
+    def test_frosted_light_folder_is_translucent(self):
+        result = transform_folder_svg(FOLDER_SVG, mode="light")
+        self.assertIsNotNone(result)
+        self.assertIn('fill="url(#mtf-folder-bg)"', result)
+        self.assertIn("#b8b8be", result)
+        self.assertIn('stop-opacity=".20"', result)
+        self.assertIn('stop-opacity=".25"', result)
+        self.assertIn('stop-opacity=".30"', result)
+        # The opaque white base under the folder body must be removed so the
+        # frosted gradient can show the wallpaper through it.
+        self.assertNotIn('width="14.287"', result)
+
+    def test_frosted_dark_folder_uses_sky_gradient(self):
+        result = transform_folder_svg(FOLDER_SVG, mode="frosted-dark")
+        self.assertIsNotNone(result)
+        self.assertIn('fill="url(#mtf-folder-bg)"', result)
+        self.assertIn("#0ea5e9", result)  # Tailwind sky-500
+        self.assertIn("#0284c7", result)  # Tailwind sky-600 at the bottom
+        self.assertNotIn('stop-color="#000000"', result)
+        self.assertNotIn('width="14.287"', result)
+
+    def test_folder_preserves_small_symbol_in_dark_mode(self):
+        svg = FOLDER_SVG.replace(
+            "</svg>",
+            '<path fill="#ff0000" d="M7 7h2v2H7z"/></svg>',
+        )
+        result = transform_folder_svg(svg, mode="dark")
+        self.assertIsNotNone(result)
+        self.assertIn('fill="#ff0000"', result)
+
+        frosted = transform_folder_svg(svg, mode="light")
+        self.assertIsNotNone(frosted)
+        self.assertNotIn('fill="#ff0000"', frosted)
+
+    def test_folder_style_fill_override_is_replaced(self):
+        svg = FOLDER_SVG.replace(
+            'fill="url(#c)" rx="1.058" ry="1.058"',
+            'fill="url(#a)" style="fill:url(#c)" rx="1.058" ry="1.058"',
+        )
+        result = transform_folder_svg(svg, mode="dark")
+        self.assertIsNotNone(result)
+        self.assertNotIn("fill:url(#c)", result)
+        self.assertNotIn('fill="url(#a)"', result)
+        self.assertIn('fill="url(#mtf-folder-bg)"', result)
+
+    def test_folder_symbols_are_recolored_for_contrast(self):
+        svg = FOLDER_SVG.replace(
+            "</svg>",
+            '<path fill="#ffffff" opacity=".2" d="M7 7h2v2H7z"/></svg>',
+        )
+        light = transform_folder_svg(svg, mode="light")
+        self.assertIsNotNone(light)
+        self.assertIn('fill="#2f2f31"', light)
+        self.assertNotIn('opacity=".2"', light)
+
+        frosted_dark = transform_folder_svg(svg, mode="frosted-dark")
+        self.assertIsNotNone(frosted_dark)
+        self.assertIn('fill="#ffffff"', frosted_dark)
+        self.assertNotIn('opacity=".2"', frosted_dark)
+
+    def test_folder_without_base_returns_none(self):
+        svg = '<svg viewBox="0 0 16 16"><path fill="#ff0000" d="M7 7h2v2H7z"/></svg>'
+        self.assertIsNone(transform_folder_svg(svg, mode="dark"))
+
+
 class TestThemeGenerator(unittest.TestCase):
     def setUp(self):
         self.tmp_dir = tempfile.mkdtemp()
@@ -332,6 +541,11 @@ class TestThemeGenerator(unittest.TestCase):
         )
         (self.src / "apps" / "scalable" / "file-manager.svg").write_text(
             '<svg viewBox="0 0 64 64"><rect width="56" height="56"/></svg>',
+            encoding="utf-8",
+        )
+        (self.src / "places" / "scalable").mkdir(parents=True)
+        (self.src / "places" / "scalable" / "folder-code.svg").write_text(
+            FOLDER_SVG,
             encoding="utf-8",
         )
         (self.src / "preferences" / "32").mkdir(parents=True)
@@ -372,6 +586,7 @@ class TestThemeGenerator(unittest.TestCase):
         self.assertEqual(stats.overridden, 1)  # Finder file-manager.svg was overridden!
         self.assertTrue((self.dest / "apps" / "scalable" / "test-app.svg").is_file())
         self.assertTrue((self.dest / "apps" / "scalable" / "file-manager.svg").is_file())
+        self.assertTrue((self.dest / "places" / "scalable" / "folder-code.svg").is_file())
         self.assertTrue((self.dest / "preferences" / "32" / "preferences-desktop-display.svg").is_file())
         self.assertTrue((self.dest / "status" / "24" / "network-wireless-100.svg").is_file())
         self.assertTrue((self.dest / "index.theme").is_file())
@@ -379,6 +594,11 @@ class TestThemeGenerator(unittest.TestCase):
         # Check that preferences icon was converted into frosted glass
         pref_content = (self.dest / "preferences" / "32" / "preferences-desktop-display.svg").read_text()
         self.assertIn("mtf-bg", pref_content)
+
+        # Check that places folders use the folder-specific translucent gradient
+        folder_content = (self.dest / "places" / "scalable" / "folder-code.svg").read_text()
+        self.assertIn("mtf-folder-bg", folder_content)
+        self.assertIn('stop-opacity=".20"', folder_content)
 
         # Check that status tray icon was preserved untouched
         status_content = (self.dest / "status" / "24" / "network-wireless-100.svg").read_text()

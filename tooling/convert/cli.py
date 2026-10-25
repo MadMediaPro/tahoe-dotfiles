@@ -4,6 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 from .engine import FrostEngine
+from .folder import is_folder_icon, transform_folder_svg
 from .theme import ThemeGenerator
 
 
@@ -62,7 +63,10 @@ def main(args=None):
         engine = FrostEngine(mode=parsed.mode)
         try:
             content = file_path.read_text(encoding="utf-8")
-            result = engine.transform(content, fallback=True)
+            if is_folder_icon(file_path.name):
+                result = transform_folder_svg(content, mode=parsed.mode)
+            else:
+                result = engine.transform(content, fallback=True)
             if result is None:
                 print(f"Error: failed to transform {file_path}", file=sys.stderr)
                 sys.exit(1)

@@ -2,11 +2,12 @@
 
 import re
 from typing import Optional
-from .color import hex_to_rgb
+from .color import ensure_luminance, hex_to_rgb
 from .constants import (
     FROST_DEFS_DARK_SOLID,
     FROST_DEFS_FROSTED_DARK,
     FROST_DEFS_LIGHT,
+    GLYPH_GRADIENT_STRENGTH,
     GLYPH_TONES,
 )
 
@@ -26,15 +27,17 @@ def strip_dangling_uses(text: str) -> str:
 
 
 def build_glyph_gradients(prefix: str) -> str:
-    """Build multi-tone linear gradients for 3D metallic/etched glyph rendering."""
+    """Build multi-tone linear gradients with a soft shaded bottom for 3D glyphs."""
     parts = []
     for idx, tone in enumerate(GLYPH_TONES):
-        top = min(255, tone + 7)
-        bottom = max(0, tone - 9)
+        top = min(255, tone + round(7 * GLYPH_GRADIENT_STRENGTH))
+        lower = round(tone * (1 - 0.07 * GLYPH_GRADIENT_STRENGTH))
+        bottom = round(tone * (1 - 0.16 * GLYPH_GRADIENT_STRENGTH))
         parts.append(
             f'<linearGradient id="{prefix}-g{idx}" x1="0" y1="0" x2="0" y2="1">'
             f'<stop offset="0" stop-color="#{top:02x}{top:02x}{top:02x}"/>'
-            f'<stop offset=".5" stop-color="#{tone:02x}{tone:02x}{tone:02x}"/>'
+            f'<stop offset=".35" stop-color="#{tone:02x}{tone:02x}{tone:02x}"/>'
+            f'<stop offset=".70" stop-color="#{lower:02x}{lower:02x}{lower:02x}"/>'
             f'<stop offset="1" stop-color="#{bottom:02x}{bottom:02x}{bottom:02x}"/>'
             f'</linearGradient>'
         )
@@ -74,10 +77,12 @@ def ensure_fill(text: str, prefix: str) -> str:
 
 def build_dark_glyph_gradient(prefix: str, top_color: str, bottom_color: str) -> str:
     """Generate linear gradient for coloring glyphs in dark frosted glass mode."""
+    top = ensure_luminance(top_color)
+    bottom = ensure_luminance(bottom_color)
     return (
         f'<linearGradient id="{prefix}-glyph" x1="0" y1="0" x2="0" y2="1">\n'
-        f'<stop offset="0" stop-color="{top_color}"/>\n'
-        f'<stop offset="1" stop-color="{bottom_color}"/>\n'
+        f'<stop offset="0" stop-color="{top}"/>\n'
+        f'<stop offset="1" stop-color="{bottom}"/>\n'
         f'</linearGradient>\n'
     )
 
