@@ -44,7 +44,7 @@ index ee822fa..cf8e58b 100644
  endif()
  if(GLASS_X11)
 diff --git a/src/blur.cpp b/src/blur.cpp
-index 1093072..302c238 100644
+index 1093072..b944d3d 100644
 --- a/src/blur.cpp
 +++ b/src/blur.cpp
 @@ -21,7 +21,7 @@
@@ -70,7 +70,21 @@ index 1093072..302c238 100644
      }
  
      m_downsamplePass.shader = ShaderManager::instance()->generateShaderFromFile(ShaderTrait::MapTexture,
-@@ -1022,12 +1029,12 @@ bool BlurEffect::shouldBlur(const EffectWindow *w, int mask, const WindowPaintDa
+@@ -811,7 +818,12 @@ BlurRegion BlurEffect::contentRegion(EffectWindow *w, const BorderRadius *fallba
+ 
+     if (auto it = m_windows.find(w); it != m_windows.end()) {
+         const std::optional<BlurRegion> &content = it->second.content;
+-        if (!m_settings.roundedCorners.ignoreContentBlurRegion || w->isDock()) {
++        // A window that declares its own blur region knows better than the
++        // "ignore content regions" switch: it is asking for a particular shape,
++        // not for a full-window blur. Keep the switch for everything else, so
++        // force-blurred apps still get their whole contents blurred.
++        const bool declaredRegion = content.has_value() && !content->isEmpty();
++        if (!m_settings.roundedCorners.ignoreContentBlurRegion || w->isDock() || declaredRegion) {
+             if (content.has_value()) {
+                 if (content->isEmpty()) {
+ #ifdef GLASS_X11
+@@ -1022,12 +1034,12 @@ bool BlurEffect::shouldBlur(const EffectWindow *w, int mask, const WindowPaintDa
      return true;
  }
  
@@ -85,7 +99,7 @@ index 1093072..302c238 100644
  }
  
  GLTexture *BlurEffect::ensureNoiseTexture(int noiseStrength)
-@@ -1128,11 +1135,7 @@ void BlurEffect::blur(const RenderTarget &renderTarget, const RenderViewport &vi
+@@ -1128,11 +1140,7 @@ void BlurEffect::blur(const RenderTarget &renderTarget, const RenderViewport &vi
      const QRect scaledBackgroundRect = snapToPixelGrid(scaledRect(backgroundRect, viewport.scale()));
      const QRect deviceBackgroundRect = scaledBackgroundRect;
  #else
@@ -98,7 +112,7 @@ index 1093072..302c238 100644
      const QRect deviceBackgroundRect = viewport.mapToDeviceCoordinates(Rect(backgroundRect)).rounded();
  #endif
      const auto opacity = data.opacity();
-@@ -1432,12 +1435,10 @@ void BlurEffect::blur(const RenderTarget &renderTarget, const RenderViewport &vi
+@@ -1432,12 +1440,10 @@ void BlurEffect::blur(const RenderTarget &renderTarget, const RenderViewport &vi
      const QRectF nativeBox = snapToPixelGridF(scaledRect(transformedRect, viewport.scale()))
                                   .translated(-scaledBackgroundRect.topLeft());
  #else
@@ -115,7 +129,7 @@ index 1093072..302c238 100644
  #endif
      const BorderRadius nativeCornerRadius = cornerRadius.scaled(viewport.scale()).rounded();
  
-@@ -1453,6 +1454,21 @@ void BlurEffect::blur(const RenderTarget &renderTarget, const RenderViewport &vi
+@@ -1453,6 +1459,21 @@ void BlurEffect::blur(const RenderTarget &renderTarget, const RenderViewport &vi
      m_roundedOnscreenPass.shader->setUniform(m_roundedOnscreenPass.texUnitLocation, 0);
      m_roundedOnscreenPass.shader->setUniform(m_roundedOnscreenPass.blurSizeLocation, QVector2D(nativeBox.width(), nativeBox.height()));
      m_roundedOnscreenPass.shader->setUniform(m_roundedOnscreenPass.edgeSizePixelsLocation, m_settings.refraction.edgeSizePixels);
@@ -137,7 +151,7 @@ index 1093072..302c238 100644
      m_roundedOnscreenPass.shader->setUniform(m_roundedOnscreenPass.refractionStrengthLocation, m_settings.refraction.refractionStrength);
      m_roundedOnscreenPass.shader->setUniform(m_roundedOnscreenPass.refractionNormalPowLocation, m_settings.refraction.refractionNormalPow);
      m_roundedOnscreenPass.shader->setUniform(m_roundedOnscreenPass.refractionRGBFringingLocation, m_settings.refraction.refractionRGBFringing);
-@@ -1673,6 +1689,22 @@ bool BlurEffect::shouldFlattenCorner(KWin::EffectWindow *w, Qt::Corner corner) c
+@@ -1673,6 +1694,22 @@ bool BlurEffect::shouldFlattenCorner(KWin::EffectWindow *w, Qt::Corner corner) c
      return false;
  }
  
